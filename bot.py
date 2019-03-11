@@ -15,7 +15,7 @@ def get_url():
 def bop(bot, update):
     url = get_url()
     chat_id = update.message.chat_id
-    bot.send_photo(chat_id=chat_id, photo=url)
+    bot.send_location(chat_id=chat_id, latitude=37.3399964, longitude=-4.5811614)
 
 def main():
     updater = Updater(token)
