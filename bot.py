@@ -1,6 +1,7 @@
 from telegram.ext import Updater, CommandHandler
 import requests
 import re
+import os
 
 token = os.environ['TELEGRAM_TOKEN']
 some_api_token = os.environ['SOME_API_TOKEN']
@@ -19,7 +20,7 @@ def bop(bot, update):
 def main():
     updater = Updater(token)
     dp = updater.dispatcher
-    
+
     dp.add_handler(CommandHandler('bop',bop))
 
     updater.start_webhook(listen="0.0.0.0",
