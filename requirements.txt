@@ -1,4 +1,3 @@
 # List of required packages (Dependencies)
 requests
-re
-python-telegram-bot 
+python-telegram-bot
