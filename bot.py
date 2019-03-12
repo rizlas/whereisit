@@ -66,7 +66,7 @@ def main():
     updater = Updater(token)
     dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler('where',where))
+    dp.add_handler(CommandHandler('where',where, pass_args=True))
 
     updater.start_webhook(listen="0.0.0.0",
                           port=port,
