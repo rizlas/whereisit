@@ -1,6 +1,7 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultLocation
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler
 from location import Location
+from uuid import uuid4
 import requests
 import re
 import json
@@ -42,6 +43,7 @@ def get_locations(param):
 
         data_json = json.loads(response.content.decode('utf-8'))
         location_count = int(data_json['summary']['numResults'])
+        locations = []
 
         if location_count > 0:
             for i in data_json['results']:
@@ -74,20 +76,25 @@ def get_locations(param):
 
 def where(bot, update, args):
     #try:
+    chat_id = update.message.chat_id
     user_input = " ".join(args)
     logger.info('User input: {0}'.format(user_input))
+
     ret = get_locations(user_input)
-    chat_id = update.message.chat_id
 
     if ret == 200:
         buttonNumber = math.ceil(int(location_count) / 3)
 
+        # inlinekeyboard
+
         keyboard = [[]]
 
         for i in range(buttonNumber):
-            keyboard[0].append(InlineKeyboardButton("Option {0}".format(i), callback_data="{0}".format(i)))
+            keyboard[0].append(InlineKeyboardButton("{0}".format(i + 1), callback_data="{0}".format(i)))
 
         reply_markup = InlineKeyboardMarkup(keyboard)
+
+        ################
 
         # Message with only first three results
         message = "{0}'{1}'{2}".format(message_title, user_input, message_title_tail)
@@ -115,6 +122,8 @@ def where(bot, update, args):
     #     logger.error("Error in level argument",e.args[0])
     #     raise
 
+# inline keyboard callback
+
 def button(bot, update):
     query = update.callback_query
     # keyboard = [[InlineKeyboardButton("<<", callback_data='tasto <<'),
@@ -126,8 +135,31 @@ def button(bot, update):
     # reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text="Selected option: {}".format(query.data))#, reply_markup=reply_markup)
 
+# inline query via @botname query
 
+def inlinequery(bot, update):
+    """Handle the inline query."""
+    query = update.inline_query.query.strip()
+    logger.info(query)
 
+    if query:
+        ret = get_locations(query)
+
+        if ret == 200:
+            results = []
+            for location in locations:
+                results.append(InlineQueryResultLocation(type = 'location', 
+                                                         id = location.id, 
+                                                         latitude = location.latitude, 
+                                                         longitude = location.longitude,
+                                                         live_period = 60,
+                                                         title = "{0}, {1}".format(location.address, location.country)))
+            
+            #results = [InlineQueryResultLocation(type='location',id=uuid4(),latitude=42.74459,longitude=42.74459,title='Oih boh')]
+
+            bot.answerInlineQuery(update.inline_query.id, results)
+
+# test command logging purpose
 
 def testcommand(bot, update):
     logger.info(json.dumps(data_json, indent=4, sort_keys=True))
@@ -159,11 +191,8 @@ def main():
     dp.add_handler(CommandHandler('testcommand',testcommand))
     dp.add_handler(CallbackQueryHandler(button))
 
-    # Inline keyboard handler (via bot chat)
-    #dp.add_handler(CommandHandler("inlinestuff", inlinestuff))
-
     # Inline query handler (via @botname query)
-    #dp.add_handler(InlineQueryHandler(inlinequery))
+    dp.add_handler(InlineQueryHandler(inlinequery))
 
     # log all errors
     dp.add_error_handler(error)
@@ -180,4 +209,9 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+
+# todo
+# no keyboard if only one page
+# new format for american addresses
+# check uk addresses
+# check russian addresses
