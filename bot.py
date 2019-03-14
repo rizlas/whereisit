@@ -87,12 +87,15 @@ def where(bot, update, args):
 
         # inlinekeyboard
 
-        keyboard = [[]]
+        reply_markup = None
 
-        for i in range(buttonNumber):
-            keyboard[0].append(InlineKeyboardButton("{0}".format(i + 1), callback_data="{0}".format(i)))
+        if buttonNumber > 1:
+            keyboard = [[]]
 
-        reply_markup = InlineKeyboardMarkup(keyboard)
+            for i in range(buttonNumber):
+                keyboard[0].append(InlineKeyboardButton("{0}".format(i + 1), callback_data="{0}".format(i)))
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
 
         ################
 
@@ -211,7 +214,7 @@ if __name__ == '__main__':
     main()
 
 # todo
-# no keyboard if only one page
+
 # new format for american addresses
 # check uk addresses
 # check russian addresses
