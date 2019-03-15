@@ -255,11 +255,11 @@ def main():
     dp = updater.dispatcher
 
     # Telegram commands
-    dp.add_handler(CommandHandler('where', where, pass_args=True))
+    dp.add_handler(CommandHandler('where', where, pass_args = True))
     dp.add_handler(CallbackQueryHandler(button))
 
-    dp.add_handler(CommandHandler('info', info, pass_args=True))
-    dp.add_handler(CommandHandler('help', help, pass_args=True))
+    dp.add_handler(CommandHandler('info', info))
+    dp.add_handler(CommandHandler('help', help)
 
     # Inline query handler (via @botname query)
     dp.add_handler(InlineQueryHandler(inlinequery))
