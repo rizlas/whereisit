@@ -236,9 +236,9 @@ def info(bot, update):
 
     bot.send_message(chat_id = chat_id, 
                      text = ("Hi fellows,\nI was developed in Italy with the aim of make Italy great again, oh no just joking.\n"
-                             "<i>How can you do such great things?</i>\n"
+                             "\n<i>How can you do such great things?</i>\n"
                              "My life is tied to TomTom's Api and I'm speaking to you thanks to python language. \U0001F40D\n"
-                             "<i>What did you just say? Do you speak Parseltongue? Bwahhh anyway you work great!</i>\n"
+                             "\n<i>What did you just say? Do you speak Parseltongue? Bwahhh anyway you work great!</i>\n"
                              "I don't know if the guy who made me did a good job but you can check it here: https://github.com/rizlas/whereisit"),
                      parse_mode = 'HTML')
 
