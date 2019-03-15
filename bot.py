@@ -222,11 +222,11 @@ def help(bot, update):
     chat_id = update.message.chat_id
 
     bot.send_message(chat_id = chat_id, 
-                     text = """<b>Commands for WhereIsItBot</b>\n\n
-                               <b>/start</b> - Give life to this amazing bot\n
-                               <b>/where</b> - With the name of a city or street will show where is it in the world (e.g. /where Rome)\n
-                               <b>/info</b> - Shows information about how this bot works\n
-                               <b>/help</b> - Shows this list""",
+                     text = ("<b>Commands for WhereIsItBot</b>\n\n"
+                             "<b>/start</b> - Give life to this amazing bot\n"
+                             "<b>/where</b> - With the name of a city or street will show where is it in the world (e.g. /where Rome)\n"
+                             "<b>/info</b> - Shows information about how this bot works\n"
+                             "<b>/help</b> - Shows this list"),
                      parse_mode = 'HTML')
 
 # show infos about bot
@@ -235,11 +235,11 @@ def info(bot, update):
     chat_id = update.message.chat_id
 
     bot.send_message(chat_id = chat_id, 
-                     text = """Hi fellows,\nI was developed in Italy with the aim of make Italy great again, oh no just joking.\n
-                     <i>How can i do such great things you say?</i>\n
-                     My life is tied to TomTom's Api and I'm speaking to you thanks to python language \U0001F40D.\n
-                     <i>What did you just say? Do you speak Parseltongue? Bwahhh anyway you work great!</i>\n
-                     I don't know if the guy who made did a good job but you can check it here: https://github.com/rizlas/whereisit""",
+                     text = ("Hi fellows,\nI was developed in Italy with the aim of make Italy great again, oh no just joking.\n"
+                             "<i>How can you do such great things?</i>\n"
+                             "My life is tied to TomTom's Api and I'm speaking to you thanks to python language. \U0001F40D\n"
+                             "<i>What did you just say? Do you speak Parseltongue? Bwahhh anyway you work great!</i>\n"
+                             "I don't know if the guy who made me did a good job but you can check it here: https://github.com/rizlas/whereisit"),
                      parse_mode = 'HTML')
 
 # Log Errors caused by Updates
