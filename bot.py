@@ -185,6 +185,7 @@ def inlinequery(bot, update):
                                                          latitude = location.latitude, 
                                                          longitude = location.longitude,
                                                          live_period = 60,
+                                                         input_message_content = "Here",
                                                          title = "{0}, {1}".format(location.address, location.country)))
             
             #results = [InlineQueryResultLocation(type='location',id=uuid4(),latitude=42.74459,longitude=42.74459,title='Oih boh')]
