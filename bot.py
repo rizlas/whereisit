@@ -167,6 +167,9 @@ def button(bot, update):
                             parse_mode = 'HTML',
                             reply_markup = reply_markup)
 
+    # NOTE: After the user presses a callback button, Telegram clients will display a progress bar until you call answerCallbackQuery. It is, therefore, necessary to react by calling answerCallbackQuery even if no notification to the user is needed (e.g., without specifying any of the optional parameters).
+    bot.answer_callback_query(callback_query_id = update.callback_query.id)
+
 # inline query via @botname query
 
 def inlinequery(bot, update):
