@@ -230,7 +230,6 @@ def main():
 
     # Telegram commands
     dp.add_handler(CommandHandler('where',where, pass_args=True))
-    dp.add_handler(CommandHandler('testcommand',testcommand))
     dp.add_handler(CallbackQueryHandler(button))
 
     # Inline query handler (via @botname query)
