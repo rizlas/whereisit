@@ -206,7 +206,7 @@ def startswithslash(bot, update):
 
     if founded == False:
         bot.send_message(chat_id = chat_id, 
-                         text = "Data are not loaded, try to input location first (e.g. 'new york' or '/where new york'")
+                         text = "I can show you where a location is in the world. Simply send me a query like 'Rome' or use /where 'location' command")
 
 # handle messages that doesn't starts with / aka messages :D
 
@@ -215,6 +215,32 @@ def noncommand(bot, update):
     chat_id = update.message.chat_id
 
     where(bot, update, user_message)
+
+# show help message
+
+def help(bot, update):
+    chat_id = update.message.chat_id
+
+    bot.send_message(chat_id = chat_id, 
+                     text = """<b>Commands for WhereIsItBot</b>\n\n
+                               <b>/start</b> - Give life to this amazing bot\n
+                               <b>/where</b> - With the name of a city or street will show where is it in the world (e.g. /where Rome)\n
+                               <b>/info</b> - Shows information about how this bot works\n
+                               <b>/help</b> - Shows this list""",
+                     parse_mode = 'HTML')
+
+# show infos about bot
+
+def info(bot, update):
+    chat_id = update.message.chat_id
+
+    bot.send_message(chat_id = chat_id, 
+                     text = """Hi fellows,\nI was developed in Italy with the aim of make Italy great again, oh no just joking.\n
+                     <i>How can i do such great things you say?</i>\n
+                     My life is tied to TomTom's Api and I'm speaking to you thanks to python language \U0001F40D.\n
+                     <i>What did you just say? Do you speak Parseltongue? Bwahhh anyway you work great!</i>\n
+                     I don't know if the guy who made did a good job but you can check it here: https://github.com/rizlas/whereisit""",
+                     parse_mode = 'HTML')
 
 # Log Errors caused by Updates
 
@@ -229,8 +255,11 @@ def main():
     dp = updater.dispatcher
 
     # Telegram commands
-    dp.add_handler(CommandHandler('where',where, pass_args=True))
+    dp.add_handler(CommandHandler('where', where, pass_args=True))
     dp.add_handler(CallbackQueryHandler(button))
+
+    dp.add_handler(CommandHandler('info', info, pass_args=True))
+    dp.add_handler(CommandHandler('help', help, pass_args=True))
 
     # Inline query handler (via @botname query)
     dp.add_handler(InlineQueryHandler(inlinequery))
@@ -244,9 +273,9 @@ def main():
     # log all errors
     dp.add_error_handler(error)
 
-    updater.start_webhook(listen="0.0.0.0",
-                          port=port,
-                          url_path=token)
+    updater.start_webhook(listen = "0.0.0.0",
+                          port = port,
+                          url_path = token)
     updater.bot.set_webhook("https://whereisitbot.herokuapp.com/" + token)
 
     # Block until the user presses Ctrl-C or the process receives SIGINT,
@@ -263,3 +292,5 @@ if __name__ == '__main__':
 # check uk addresses
 # check russian addresses
 # tests with most common city name
+
+# send location with coordinates as params
