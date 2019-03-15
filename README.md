@@ -9,9 +9,11 @@ Fell free to make pull requests, fork, destroy or whatever you like most.
 
 Thanks also to https://www.flaticon.com/authors/turkkub for the awesome logo.
 
-<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/t_logo.png" width="100" height="100" />
-<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/bot_father.jpg" width="100" height="100" />
-<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/inline_bots.jpg" width="100" height="100" />
-<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/Tomtom_logo_250.jpg" width="100" height="100" />
-<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/ptb-logo_240.png" width="100" height="100" />
-<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/Heroku-01_280.png" width="100" height="100" />
+<div align="center">
+<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/t_logo.png" width="50" height="50" />
+<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/bot_father.jpg" width="50" height="68" />
+<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/inline_bots.jpg" width="50" height="68" />
+<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/Tomtom_logo_250.jpg" width="50" height="50" />
+<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/ptb-logo_240.png" width="50" height="50" />
+<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/Heroku-01_280.png" width="50" height="50" />
+</div>
