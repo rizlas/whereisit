@@ -259,7 +259,7 @@ def main():
     dp.add_handler(CallbackQueryHandler(button))
 
     dp.add_handler(CommandHandler('info', info))
-    dp.add_handler(CommandHandler('help', help)
+    dp.add_handler(CommandHandler('help', help))
 
     # Inline query handler (via @botname query)
     dp.add_handler(InlineQueryHandler(inlinequery))
