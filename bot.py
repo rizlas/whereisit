@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultLocation
-from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler, MessageHandler, Filters
 from location import Location
-from uuid import uuid4
+#from uuid import uuid4
 import requests
 import re
 import json
@@ -29,7 +29,7 @@ message_title_tail = "</b>\n\n"
 
 port = int(os.environ.get('PORT', '8443'))
 
-# Try to put business logic in this section
+# Try to put business logic in this section :|
 
 def get_locations(param):
     api_url = '{0}{1}.json?key={2}'.format(api_url_base, param, api_key)
@@ -48,7 +48,7 @@ def get_locations(param):
         if location_count > 0:
             for i in data_json['results']:
                 if i['address'].get('countrySubdivision') is not None:
-                    locations.append(Location(Id = i['id'], 
+                    locations.append(Location(Id = i['id'].replace('/', '_'), 
                                               address = i['address']['freeformAddress'],
                                               country = i['address']['country'],
                                               countrySubdivision = i['address']['countrySubdivision'],
@@ -56,7 +56,7 @@ def get_locations(param):
                                               longitude = i['position']['lon'],
                                               locType = i['type']))
                 else:
-                    locations.append(Location(Id = i['id'], 
+                    locations.append(Location(Id = i['id'].replace('/', '_'), 
                                               address = i['address']['freeformAddress'],
                                               country = i['address']['country'],
                                               countrySubdivision = None,
@@ -72,32 +72,45 @@ def get_locations(param):
         logger.error('Error response code: {0}'.format(response.status_code))
         return response.status_code
 
+# inline keyboard generator
+
+def inline_keyboard(user_input, key_selected = 0):
+    buttonNumber = math.ceil(int(location_count) / 3)
+    reply_markup = None
+    button_text = ""
+
+    if buttonNumber > 1:
+        keyboard = [[]]
+
+        for i in range(buttonNumber):
+            if i != key_selected:
+                button_text = "{0}".format(i + 1)
+            else:
+                button_text = "• {0} •".format(i + 1)
+
+            keyboard[0].append(InlineKeyboardButton(button_text, callback_data = "{0}:{1}".format((i + 1), user_input)))
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+    return reply_markup
+
 #################################################################################################
 
 def where(bot, update, args):
-    #try:
     chat_id = update.message.chat_id
-    user_input = " ".join(args)
+    user_input = ""
+
+    if isinstance(args, list) == True:
+        user_input = " ".join(args)
+    else:
+        user_input = args
+
     logger.info('User input: {0}'.format(user_input))
 
     ret = get_locations(user_input)
 
     if ret == 200:
-        buttonNumber = math.ceil(int(location_count) / 3)
-
-        # inlinekeyboard
-
-        reply_markup = None
-
-        if buttonNumber > 1:
-            keyboard = [[]]
-
-            for i in range(buttonNumber):
-                keyboard[0].append(InlineKeyboardButton("{0}".format(i + 1), callback_data="{0}".format(i)))
-
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-        ################
+        reply_markup = inline_keyboard(user_input)
 
         # Message with only first three results
         message = "{0}'{1}'{2}".format(message_title, user_input, message_title_tail)
@@ -113,30 +126,46 @@ def where(bot, update, args):
                          text = message, 
                          parse_mode = 'HTML',
                          reply_markup = reply_markup)
+
     elif ret == 204:
         bot.send_message(chat_id = chat_id, 
-                         text = 'No locations was found for {0}'.format(user_input))
+                         text = "No locations was found for '{0}'".format(user_input))
     else:
         bot.send_message(chat_id = chat_id, 
                          text = 'An error has occured')
 
-        #bot.send_location(chat_id=chat_id, latitude=37.3399964, longitude=-4.5811614)
-    # except Exception as e:
-    #     logger.error("Error in level argument",e.args[0])
-    #     raise
+    #bot.send_location(chat_id=chat_id, latitude=37.3399964, longitude=-4.5811614)
 
 # inline keyboard callback
 
 def button(bot, update):
-    query = update.callback_query
-    # keyboard = [[InlineKeyboardButton("<<", callback_data='tasto <<'),
-    #          InlineKeyboardButton("1", callback_data='tasto 1'),
-    #          InlineKeyboardButton("2", callback_data='tasto 2'),
-    #          InlineKeyboardButton("3", callback_data='tasto 3'),
-    #          InlineKeyboardButton(">>", callback_data='tasto >>'),]]
+    query = update.callback_query   # Contains data on the message including user information
+    key_selected, user_input = query.data.split(":")
 
-    # reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(text="Selected option: {}".format(query.data))#, reply_markup=reply_markup)
+    #logger.info(key_selected)
+    message = "{0}'{1}'{2}".format(message_title, user_input, message_title_tail)
+
+    #log_msg = "\n\n"
+    #for i in range(len(locations)):
+    #    log_msg += "Index: {0}\nData: {1}\n\n".format(i, locations[i].toString())
+    #logger.info(log_msg)
+
+    for i in range(len(locations)):
+        if math.ceil((i + 1) / 3) == int(key_selected):
+            message += "{0} {1}\n\n".format(map_emoji, locations[i].toString())
+        elif math.ceil((i + 1) / 3) > int(key_selected):
+            break
+
+    # keyboard = [[InlineKeyboardButton("<<", callback_data='key <<'),
+    #          InlineKeyboardButton("1", callback_data='key 1'),
+    #          InlineKeyboardButton("2", callback_data='key 2'),
+    #          InlineKeyboardButton("3", callback_data='key 3'),
+    #          InlineKeyboardButton(">>", callback_data='key >>'),]]
+
+    reply_markup = inline_keyboard(user_input, int(key_selected) - 1)
+    query.edit_message_text(text = message,
+                            parse_mode = 'HTML',
+                            reply_markup = reply_markup)
 
 # inline query via @botname query
 
@@ -162,24 +191,34 @@ def inlinequery(bot, update):
 
             bot.answerInlineQuery(update.inline_query.id, results)
 
-# test command logging purpose
+# Show location selected on bot answer
 
-def testcommand(bot, update):
-    logger.info(json.dumps(data_json, indent=4, sort_keys=True))
-    logger.info("Location count {0}".format(location_count))
+def startswithslash(bot, update):
+    user_message = update.message.text[1:]
+    chat_id = update.message.chat_id
+    founded = False
 
-    # string = ""
-    # for i in data_json['results']:
-    #     if i['address'].get('countrySubdivision') is not None:
-    #         string += "{6} <b>Address: {0}\n</b>Country: {1} - {2}\nLat: {3} Lon: {4}\nType: {5}\n\n".format(i['address']['freeformAddress'], i['address']['country'], i['address']['countrySubdivision'], i['position']['lat'], i['position']['lon'], i['type'], map_emoji)
-    #     else:
-    #         string += "{5} <b>Address: {0}\n</b>Country: {1}\nLat: {2} Lon: {3}\nType: {4}\n\n".format(i['address']['freeformAddress'], i['address']['country'], i['position']['lat'], i['position']['lon'], i['type'], map_emoji)
+    for location in locations:
+        if location.id == user_message:
+            founded = True
+            bot.send_location(chat_id = chat_id, latitude = location.latitude, longitude = location.longitude)
+            break
 
-    #     logger.info(string)
+    if founded == False:
+        bot.send_message(chat_id = chat_id, 
+                         text = "Data are not loaded, try to input location first (e.g. 'new york' or '/where new york'")
 
+# handle messages that doesn't starts with / aka messages :D
+
+def noncommand(bot, update):
+    user_message = update.message.text
+    chat_id = update.message.chat_id
+
+    where(bot, update, user_message)
+
+# Log Errors caused by Updates
 
 def error(update, context):
-    """Log Errors caused by Updates."""
     logger.warning('Update {0} caused error {1}'.format(update, context.error))
 
 
@@ -196,6 +235,12 @@ def main():
 
     # Inline query handler (via @botname query)
     dp.add_handler(InlineQueryHandler(inlinequery))
+
+    # on command not defined
+    dp.add_handler(MessageHandler(Filters.command, startswithslash))
+
+    # on noncommand i.e message
+    dp.add_handler(MessageHandler(Filters.text, noncommand))
 
     # log all errors
     dp.add_error_handler(error)
@@ -218,3 +263,4 @@ if __name__ == '__main__':
 # new format for american addresses
 # check uk addresses
 # check russian addresses
+# tests with most common city name
