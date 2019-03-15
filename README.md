@@ -7,8 +7,8 @@ The bot can be used both via command or inline in your personal chats. (https://
 
 Fell free to make pull requests, fork, destroy or whatever you like most.
 
-Thanks also to https://www.flaticon.com/authors/turkkub for the awesome logo.
-
+Thanks also to https://www.flaticon.com/authors/turkkub for the awesome logo.\
+<br/>
 <div align="center">
 <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/t_logo.png" width="50" height="50" />
 <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/bot_father.jpg" width="50" height="68" />
@@ -17,3 +17,8 @@ Thanks also to https://www.flaticon.com/authors/turkkub for the awesome logo.
 <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/ptb-logo_240.png" width="50" height="50" />
 <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/Heroku-01_280.png" width="50" height="50" />
 </div>
+
+<br/>
+
+<div align="center"><img src="https://avatars1.githubusercontent.com/u/8522635?s=96&v=4"/></div>
+<p align="center">#followtheturtle</p>
