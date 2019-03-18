@@ -7,6 +7,8 @@ The bot can be used both via command or inline in your personal chats. (https://
 
 Fell free to make pull requests, fork, destroy or whatever you like most.
 
+Bot here: https://t.me/WhereIsItMapBot
+
 Thanks also to https://www.flaticon.com/authors/turkkub for the awesome logo.\
 <br/>
 <div align="center">

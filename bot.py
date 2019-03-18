@@ -1,4 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultLocation, InputLocationMessageContent, InputVenueMessageContent
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultLocation, InputVenueMessageContent
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler, MessageHandler, Filters
 from location import Location
 #from uuid import uuid4
@@ -188,7 +188,10 @@ def inlinequery(bot, update):
                                                          latitude = location.latitude, 
                                                          longitude = location.longitude,
                                                          live_period = 60,
-                                                         input_message_content = InputVenueMessageContent(latitude = location.latitude, longitude = location.longitude, title = query, address = location.address),
+                                                         input_message_content = InputVenueMessageContent(latitude = location.latitude, 
+                                                                                                          longitude = location.longitude, 
+                                                                                                          title = query.capitalize(), 
+                                                                                                          address = location.address),
                                                          title = "{0}, {1}".format(location.address, location.country)))
             
             #results = [InlineQueryResultLocation(type='location',id=uuid4(),latitude=42.74459,longitude=42.74459,title='Oih boh')]
