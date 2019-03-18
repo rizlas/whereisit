@@ -1,4 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultLocation, InputLocationMessageContent
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultLocation, InputLocationMessageContent, InputVenueMessageContent
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler, MessageHandler, Filters
 from location import Location
 #from uuid import uuid4
