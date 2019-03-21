@@ -187,10 +187,15 @@ def inlinequery(bot, update):
         if ret == 200:
             results = []
             address_venue_str = ""
+            title_str = ""
             for location in locations:
                 address_venue_str = location.subDivision()
+                title_str = "{0}, {1}".format(location.address, location.country)
+
                 if address_venue_str == "":
                   address_venue_str = location.address
+                else:
+                  title_str += " ({0})".format(address_venue_str)
 
                 results.append(InlineQueryResultLocation(type = 'location', 
                                                          id = location.id, 
@@ -201,7 +206,7 @@ def inlinequery(bot, update):
                                                                                                           longitude = location.longitude, 
                                                                                                           title = "You've searched: " + query.capitalize(), 
                                                                                                           address = address_venue_str),
-                                                         title = "{0}, {1}\n{2}".format(location.address, location.country, location.subDivision())))
+                                                         title = title_str))
             
             #results = [InlineQueryResultLocation(type='location',id=uuid4(),latitude=42.74459,longitude=42.74459,title='Oih boh')]
 
