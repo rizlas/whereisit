@@ -201,7 +201,7 @@ def inlinequery(bot, update):
                                                                                                           longitude = location.longitude, 
                                                                                                           title = "You've searched: " + query.capitalize(), 
                                                                                                           address = address_venue_str),
-                                                         title = "{0}, {1}".format(location.address, location.country)))
+                                                         title = "{0}, {1}\n{2}".format(location.address, location.country, location.subDivision())))
             
             #results = [InlineQueryResultLocation(type='location',id=uuid4(),latitude=42.74459,longitude=42.74459,title='Oih boh')]
 
