@@ -182,7 +182,13 @@ def inlinequery(bot, update):
 
         if ret == 200:
             results = []
+            address_venue_str = ""
             for location in locations:
+                if location.countrySubdivision is not None:
+                  address_venue_str = "{0} ({1})".format(location.address, location.countrySubdivision)
+                else:
+                  address_venue_str = location.address
+
                 results.append(InlineQueryResultLocation(type = 'location', 
                                                          id = location.id, 
                                                          latitude = location.latitude, 
@@ -190,8 +196,8 @@ def inlinequery(bot, update):
                                                          live_period = 60,
                                                          input_message_content = InputVenueMessageContent(latitude = location.latitude, 
                                                                                                           longitude = location.longitude, 
-                                                                                                          title = query.capitalize(), 
-                                                                                                          address = location.address),
+                                                                                                          title = "You've searched: " + query.capitalize(), 
+                                                                                                          address = address_venue_str),
                                                          title = "{0}, {1}".format(location.address, location.country)))
             
             #results = [InlineQueryResultLocation(type='location',id=uuid4(),latitude=42.74459,longitude=42.74459,title='Oih boh')]
