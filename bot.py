@@ -47,22 +47,23 @@ def get_locations(param):
 
         if location_count > 0:
             for i in data_json['results']:
+                loc_tmp = Location(Id = i['id'].replace('/', '_'), 
+                                   address = i['address']['freeformAddress'],
+                                   country = i['address']['country'],
+                                   latitude = i['position']['lat'],
+                                   longitude = i['position']['lon'],
+                                   locType = i['type'])
+
                 if i['address'].get('countrySubdivision') is not None:
-                    locations.append(Location(Id = i['id'].replace('/', '_'), 
-                                              address = i['address']['freeformAddress'],
-                                              country = i['address']['country'],
-                                              countrySubdivision = i['address']['countrySubdivision'],
-                                              latitude = i['position']['lat'],
-                                              longitude = i['position']['lon'],
-                                              locType = i['type']))
-                else:
-                    locations.append(Location(Id = i['id'].replace('/', '_'), 
-                                              address = i['address']['freeformAddress'],
-                                              country = i['address']['country'],
-                                              countrySubdivision = None,
-                                              latitude = i['position']['lat'],
-                                              longitude = i['position']['lon'],
-                                              locType = i['type']))
+                    loc_tmp.countrySubdivision = i['address']['countrySubdivision']
+
+                if i['address'].get('countrySecondarySubdivision') is not None:
+                    loc_tmp.countrySecondarySubdivision = i['address']['countrySecondarySubdivision']
+
+                if i['address'].get('countrySubdivisionName') is not None:
+                    loc_tmp.countrySubdivisionName = i['address']['countrySubdivisionName']
+
+                locations.append(loc_tmp)
             
             return response.status_code
 
@@ -184,9 +185,8 @@ def inlinequery(bot, update):
             results = []
             address_venue_str = ""
             for location in locations:
-                if location.countrySubdivision is not None:
-                  address_venue_str = "{0} ({1})".format(location.address, location.countrySubdivision)
-                else:
+                address_venue_str = location.subDivision()
+                if address_venue_str == "":
                   address_venue_str = location.address
 
                 results.append(InlineQueryResultLocation(type = 'location', 
