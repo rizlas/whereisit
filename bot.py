@@ -50,6 +50,9 @@ def get_locations(param):
                 loc_tmp = Location(Id = i['id'].replace('/', '_'), 
                                    address = i['address']['freeformAddress'],
                                    country = i['address']['country'],
+                                   countrySubdivision = None,
+                                   countrySecondarySubdivision = None,
+                                   countrySubdivisionName = None,
                                    latitude = i['position']['lat'],
                                    longitude = i['position']['lon'],
                                    locType = i['type'])
