@@ -110,10 +110,11 @@ def where(bot, update, args):
     else:
         user_input = args
 
-    #easter here
+    #################################################
     if user_input == 'rizlas':
       easteregg(bot, update, 'where', user_input)
       return
+    #################################################
 
     logger.info('User input: {0}'.format(user_input))
 
@@ -247,9 +248,12 @@ def inlinequery(bot, update):
     logger.info(query)
 
     if query:
+
+      #################################################
         if query.lower() == 'rizlas':
           easteregg(bot, update, 'inline', query)
           return
+      #################################################
 
         ret = get_locations(query)
 
@@ -310,26 +314,20 @@ def noncommand(bot, update):
 
 def help(bot, update):
     chat_id = update.message.chat_id
+    help_text = os.environ['Help_Text']
 
     bot.send_message(chat_id = chat_id, 
-                     text = ("<b>Commands for WhereIsItBot</b>\n\n"
-                             "<b>/start</b> - Give life to this amazing bot\n"
-                             "<b>/where</b> - With the name of a city or street will show where is it in the world (e.g. /where Rome)\n"
-                             "<b>/info</b> - Shows information about how this bot works\n"
-                             "<b>/help</b> - Shows this list"),
+                     text = (help_text),
                      parse_mode = 'HTML')
 
 # show infos about bot
 
 def info(bot, update):
     chat_id = update.message.chat_id
+    info_text = os.environ['Info_Text']
 
     bot.send_message(chat_id = chat_id, 
-                     text = ("Hi fellows,\nI was developed in Italy with the aim of make Italy great again, oh no just joking.\n"
-                             "\n<i>How can you do such great things?</i>\n"
-                             "My life is tied to TomTom's Api and I'm speaking to you thanks to python language. \U0001F40D\n"
-                             "\n<i>What did you just say? Do you speak Parseltongue? Bwahhh anyway you work great!</i>\n"
-                             "I don't know if the guy who made me did a good job but you can check it here: https://github.com/rizlas/whereisit"),
+                     text = info_text,
                      parse_mode = 'HTML')
 
 # Log Errors caused by Updates
