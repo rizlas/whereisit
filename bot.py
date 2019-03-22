@@ -121,6 +121,8 @@ def CoordinatesSearch(lat, lon):
 def isCoordinatesSearch(param):
   lat, lon = param.split(',')
 
+  logger.info("IN " + param)
+
   lat = lat.strip()
   lon = lon.strip()
 
@@ -279,28 +281,29 @@ def inlinequery(bot, update):
 
     if "," in query:
       if isCoordinatesSearch(query):
-            lat, lon = user_input.split(',')
-            # function
-            status_code, title, address = CoordinatesSearch(lat, lon)
-            # handle return trple
-            if status_code == 200:
-              results = []
-              results.append(InlineQueryResultLocation(type = 'location', 
-                                                       id = 'single_location', 
-                                                       latitude = lat, 
-                                                       longitude = lon,
-                                                       live_period = 60,
-                                                       input_message_content = InputVenueMessageContent(latitude = lat, 
-                                                                                                        longitude = lon, 
-                                                                                                        title = "You've searched: " + query.capitalize(), 
-                                                                                                        address = address),
-                                                       title = title))
+        logger.info("isCoordinatesSearch")
+        lat, lon = user_input.split(',')
+        # function
+        status_code, title, address = CoordinatesSearch(lat, lon)
+        # handle return trple
+        if status_code == 200:
+          results = []
+          results.append(InlineQueryResultLocation(type = 'location', 
+                                                   id = 'single_location', 
+                                                   latitude = lat, 
+                                                   longitude = lon,
+                                                   live_period = 60,
+                                                   input_message_content = InputVenueMessageContent(latitude = lat, 
+                                                                                                    longitude = lon, 
+                                                                                                    title = "You've searched: " + query.capitalize(), 
+                                                                                                    address = address),
+                                                   title = title))
 
-              bot.answerInlineQuery(update.inline_query.id, results)
-              return
-            else:
-              return
-            #elif qualcosa
+          bot.answerInlineQuery(update.inline_query.id, results)
+          return
+        else:
+          return
+        #elif qualcosa
 
     if query:
 
