@@ -110,8 +110,19 @@ def CoordinatesSearch(lat, lon):
 
   if status_code == 200:
     json_data = json.loads(response.content.decode('utf-8'))
-    title = "{0}, {1}".format(json_data['addresses'][0]['address']['country'], json_data['addresses'][0]['address']['countrySubdivision'])
-    address = json_data['addresses'][0]['address']['freeformAddress']
+
+    if json_data['addresses'][0]['address']['country'] is not None:
+      title = json_data['addresses'][0]['address']['country']
+      if json_data['addresses'][0]['address']['countrySubdivision'] is not None:
+        title += ", " + json_data['addresses'][0]['address']['countrySubdivision']
+    else:
+      title = "{0}, {1}".format(lat, lon)
+
+    if json_data['addresses'][0]['address']['freeformAddress'] is not None:
+      address = json_data['addresses'][0]['address']['freeformAddress']
+    else:
+      address = "{0}, {1}".format(lat, lon)
+
     return status_code, title, address
   elif status_code == 400:
     return status_code, "One or more parameters were incorrectly specified.", ""
