@@ -218,7 +218,7 @@ def easteregg(bot, update, fro_m, query):
     address = 'Here is WhereIsItMapBot Easter Egg'
 
     if fro_m == 'where':
-      bot.send_venue(chat_id = chat_id, 
+      bot.send_venue(chat_id = update.message.chat_id, 
                      latitude = lat, 
                      longitude = lon,
                      title = title,
