@@ -410,6 +410,16 @@ def info(bot, update):
                      text = emojize(info_text, use_aliases = True),
                      parse_mode = 'HTML')
 
+# Show infos about how to use inline mode
+
+def inline(bot, update):
+    chat_id = update.message.chat_id
+    inline_info_text = os.environ['Inline_Info_Text']
+
+    bot.send_message(chat_id = chat_id, 
+                     text = inline_info_text,
+                     parse_mode = 'HTML')
+
 # Log Errors caused by Updates
 
 def error(update, context):
@@ -428,6 +438,7 @@ def main():
 
     dp.add_handler(CommandHandler('location', f_location, pass_args = True))
 
+    dp.add_handler(CommandHandler('inline', inline))
     dp.add_handler(CommandHandler('info', info))
     dp.add_handler(CommandHandler('help', help))
 
