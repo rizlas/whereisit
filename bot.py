@@ -283,6 +283,8 @@ def inlinequery(bot, update):
         lat, lon = query.split(',')
         status_code, title, address = CoordinatesSearch(lat, lon)
 
+        logger.info("{0} {1}\n{2}\n{3}\n{4}".format(lat, lon, status_code, title, address))
+
         if status_code == 200:
           results = []
           results.append(InlineQueryResultLocation(type = 'location', 
