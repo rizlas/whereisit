@@ -326,8 +326,14 @@ def info(bot, update):
     chat_id = update.message.chat_id
     info_text = os.environ['Info_Text']
 
+    logger.info(info_text)
+    logger.info("\n")
+    logger.info(info_text.decode('utf8'))
+    logger.info("\n")
+    logger.info(info_text.encode('utf8'))
+
     bot.send_message(chat_id = chat_id, 
-                     text = info_text.encode('utf8'),
+                     text = info_text.decode('utf8'),
                      parse_mode = 'HTML')
 
 # Log Errors caused by Updates
