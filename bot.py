@@ -316,6 +316,8 @@ def help(bot, update):
     chat_id = update.message.chat_id
     help_text = os.environ['Help_Text']
 
+    logger.info(help_text)
+
     bot.send_message(chat_id = chat_id, 
                      text = help_text,
                      parse_mode = 'HTML')
