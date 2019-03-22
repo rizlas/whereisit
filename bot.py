@@ -292,8 +292,8 @@ def inlinequery(bot, update):
                                                    latitude = float(lat), 
                                                    longitude = float(lon),
                                                    live_period = 60,
-                                                   input_message_content = InputVenueMessageContent(latitude = lat, 
-                                                                                                    longitude = lon, 
+                                                   input_message_content = InputVenueMessageContent(latitude = float(lat), 
+                                                                                                    longitude = float(lon), 
                                                                                                     title = "You've searched: " + query.capitalize(), 
                                                                                                     address = address),
                                                    title = title))
