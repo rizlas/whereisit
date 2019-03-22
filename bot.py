@@ -143,7 +143,7 @@ def where(bot, update, args):
 
 def f_location(bot, update, args):
     chat_id = update.message.chat_id
-    user_input = " ".join(args.split())
+    user_input = " ".join(args)
     lat, lon = user_input.split(',')
 
     logger.info('User input: {0}'.format(user_input))
