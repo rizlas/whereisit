@@ -120,19 +120,17 @@ def CoordinatesSearch(lat, lon):
 
 def isCoordinatesSearch(param):
   lat, lon = param.split(',')
-
-  logger.info("IN " + param)
+  logger.info("isCoordinatesSearch " + param)
 
   lat = lat.strip()
   lon = lon.strip()
 
-  if isinstance(lat, float) is False:
-    return False
-
-  if isinstance(lon, float) is False:
-    return False
-
-  return True
+  try:
+        float(lat)
+        float(lon)
+        return True
+  except ValueError:
+      return False
 
 #################################################################################################
 
@@ -281,11 +279,10 @@ def inlinequery(bot, update):
 
     if "," in query:
       if isCoordinatesSearch(query):
-        logger.info("isCoordinatesSearch")
+        logger.info("isCoordinatesSearch True")
         lat, lon = user_input.split(',')
-        # function
         status_code, title, address = CoordinatesSearch(lat, lon)
-        # handle return trple
+
         if status_code == 200:
           results = []
           results.append(InlineQueryResultLocation(type = 'location', 
@@ -301,9 +298,21 @@ def inlinequery(bot, update):
 
           bot.answerInlineQuery(update.inline_query.id, results)
           return
+        elif status_code == 400:
+          results = []
+          results.append(InlineQueryResultArticle(id = 'single_location',
+                                                  title = title,
+                                                  input_message_content=InputTextMessageContent(title)))
+
+          bot.answerInlineQuery(update.inline_query.id, results)
         else:
+          results = []
+          results.append(InlineQueryResultArticle(id = 'single_location',
+                                                  title = title,
+                                                  input_message_content=InputTextMessageContent(title)))
+
+          bot.answerInlineQuery(update.inline_query.id, results)
           return
-        #elif qualcosa
 
     if query:
 
