@@ -145,6 +145,7 @@ def f_location(bot, update, args):
     chat_id = update.message.chat_id
     user_input = " ".join(args)
     lat, lon = user_input.split(',')
+    json_data = None
 
     logger.info('User input: {0}'.format(user_input))
 
@@ -155,9 +156,9 @@ def f_location(bot, update, args):
     response = requests.get(api_url)
 
     if response.status_code == 200:
-        json = json.loads(response.content.decode('utf-8'))
-        title = "{0}, {1}".format(json['addresses'][0]['address']['country'], json['addresses'][0]['address']['countrySubdivision'])
-        address = json['addresses'][0]['address']['freeformAddress']
+        json_data = json.loads(response.content.decode('utf-8'))
+        title = "{0}, {1}".format(json_data['addresses'][0]['address']['country'], json_data['addresses'][0]['address']['countrySubdivision'])
+        address = json_data['addresses'][0]['address']['freeformAddress']
 
         bot.send_venue(chat_id = chat_id, 
                        latitude = float(lat), 
