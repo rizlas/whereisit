@@ -78,7 +78,7 @@ def get_locations(param):
         logger.error('Error response code: {0}'.format(response.status_code))
         return response.status_code
 
-# inline keyboard generator
+# Inline keyboard generator
 
 def inline_keyboard(user_input, key_selected = 0):
     buttonNumber = math.ceil(int(location_count) / 3)
@@ -100,7 +100,41 @@ def inline_keyboard(user_input, key_selected = 0):
 
     return reply_markup
 
+def CoordinatesSearch(lat, lon):
+  api_url = '{0}{1}, {2}.json?key={3}'.format(api_url_base_reverse_geocode, lat, lon, api_key)
+
+  logger.info("Api requests url: {0}".format(api_url))
+
+  response = requests.get(api_url)
+  status_code = response.status_code
+
+  if status_code == 200:
+    json_data = json.loads(response.content.decode('utf-8'))
+    title = "{0}, {1}".format(json_data['addresses'][0]['address']['country'], json_data['addresses'][0]['address']['countrySubdivision'])
+    address = json_data['addresses'][0]['address']['freeformAddress']
+    return status_code, title, address
+  elif status_code == 400:
+    return status_code, "One or more parameters were incorrectly specified.", ""
+  else:
+    return status_code, "An error has occured", ""
+
+def isCoordinatesSearch(param):
+  lat, lon = param.split(',')
+
+  lat = lat.strip()
+  lon = lon.strip()
+
+  if isinstance(lat, float) is False:
+    return False
+
+  if isinstance(lon, float) is False:
+    return False
+
+  return True
+
 #################################################################################################
+
+# Where is Rome?
 
 def where(bot, update, args):
     chat_id = update.message.chat_id
@@ -148,6 +182,8 @@ def where(bot, update, args):
 
     #bot.send_location(chat_id=chat_id, latitude=37.3399964, longitude=-4.5811614)
 
+# Location with coordinates
+
 def f_location(bot, update, args):
     chat_id = update.message.chat_id
     user_input = " ".join(args)
@@ -155,30 +191,22 @@ def f_location(bot, update, args):
 
     logger.info('User input: {0}'.format(user_input))
 
-    api_url = '{0}{1}, {2}.json?key={3}'.format(api_url_base_reverse_geocode, lat, lon, api_key)
+    status_code, title, address = CoordinatesSearch(lat, lon)
 
-    logger.info("Api requests url: {0}".format(api_url))
-
-    response = requests.get(api_url)
-
-    if response.status_code == 200:
-        json_data = json.loads(response.content.decode('utf-8'))
-        title = "{0}, {1}".format(json_data['addresses'][0]['address']['country'], json_data['addresses'][0]['address']['countrySubdivision'])
-        address = json_data['addresses'][0]['address']['freeformAddress']
-
+    if status_code == 200:
         bot.send_venue(chat_id = chat_id, 
                        latitude = float(lat), 
                        longitude = float(lon),
                        title = title,
                        address = address)
-    elif response.status_code == 400:
+    elif status_code == 400:
         bot.send_message(chat_id = chat_id, 
                          text = "One or more parameters were incorrectly specified.")
     else:
         bot.send_message(chat_id = chat_id, 
                          text = 'An error has occured')
 
-# inline keyboard callback
+# Inline keyboard callback
 
 def button(bot, update):
     query = update.callback_query   # Contains data on the message including user information
@@ -212,6 +240,8 @@ def button(bot, update):
     # NOTE: After the user presses a callback button, Telegram clients will display a progress bar until you call answerCallbackQuery. It is, therefore, necessary to react by calling answerCallbackQuery even if no notification to the user is needed (e.g., without specifying any of the optional parameters).
     bot.answer_callback_query(callback_query_id = update.callback_query.id)
 
+# Easteregg
+
 def easteregg(bot, update, fro_m, query):
     lat = -27.122295
     lon = -109.288839
@@ -240,13 +270,37 @@ def easteregg(bot, update, fro_m, query):
 
       bot.answerInlineQuery(update.inline_query.id, easter_results)
 
-
-# inline query via @botname query
+# Inline query via @botname query
 
 def inlinequery(bot, update):
     """Handle the inline query."""
     query = update.inline_query.query.strip()
     logger.info(query)
+
+    if "," in query:
+      if isCoordinatesSearch(query):
+            lat, lon = user_input.split(',')
+            # function
+            status_code, title, address = CoordinatesSearch(lat, lon)
+            # handle return trple
+            if status_code == 200:
+              results = []
+              results.append(InlineQueryResultLocation(type = 'location', 
+                                                       id = 'single_location', 
+                                                       latitude = lat, 
+                                                       longitude = lon,
+                                                       live_period = 60,
+                                                       input_message_content = InputVenueMessageContent(latitude = lat, 
+                                                                                                        longitude = lon, 
+                                                                                                        title = "You've searched: " + query.capitalize(), 
+                                                                                                        address = address),
+                                                       title = title))
+
+              bot.answerInlineQuery(update.inline_query.id, results)
+              return
+            else:
+              return
+            #elif qualcosa
 
     if query:
 
@@ -303,7 +357,7 @@ def startswithslash(bot, update):
         bot.send_message(chat_id = chat_id, 
                          text = "I can show you where a location is in the world. Simply send me a query like 'Rome' or use /where 'location' command")
 
-# handle messages that doesn't starts with / aka messages :D
+# Handle messages that doesn't starts with / aka messages :D
 
 def noncommand(bot, update):
     user_message = update.message.text
@@ -311,7 +365,7 @@ def noncommand(bot, update):
 
     where(bot, update, user_message)
 
-# show help message
+# Show help message
 
 def help(bot, update):
     chat_id = update.message.chat_id
@@ -321,7 +375,7 @@ def help(bot, update):
                      text = help_text,
                      parse_mode = 'HTML')
 
-# show infos about bot
+# Show infos about bot
 
 def info(bot, update):
     chat_id = update.message.chat_id
