@@ -214,6 +214,24 @@ def inlinequery(bot, update):
     logger.info(query)
 
     if query:
+        if query.lower() == 'carac':
+          easter_results = []
+          lat = -27.122295
+          lon = -109.288839
+          easter_results.append(InlineQueryResultLocation(type = 'location', 
+                                                          id = 'carac', 
+                                                          latitude = lat, 
+                                                          longitude = lon,
+                                                          live_period = 60,
+                                                          input_message_content = InputVenueMessageContent(latitude = lat, 
+                                                                                                           longitude = lon, 
+                                                                                                           title = "You've searched: " + query.capitalize(), 
+                                                                                                           address = 'Here is WhereIsItMapBot Easter Egg'),
+                                                          title = 'Click me to find out!'))
+
+          bot.answerInlineQuery(update.inline_query.id, easter_results)
+          return
+
         ret = get_locations(query)
 
         if ret == 200:
