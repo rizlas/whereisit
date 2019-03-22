@@ -317,7 +317,7 @@ def help(bot, update):
     help_text = os.environ['Help_Text']
 
     bot.send_message(chat_id = chat_id, 
-                     text = (help_text),
+                     text = help_text,
                      parse_mode = 'HTML')
 
 # show infos about bot
