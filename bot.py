@@ -111,7 +111,7 @@ def where(bot, update, args):
         user_input = args
 
     #easter here
-    if user_input == 'carac':
+    if user_input == 'rizlas':
       easteregg(bot, update, 'where', user_input)
       return
 
@@ -226,7 +226,7 @@ def easteregg(bot, update, fro_m, query):
     elif fro_m == 'inline':
       easter_results = []
       easter_results.append(InlineQueryResultLocation(type = 'location', 
-                                                      id = 'carac', 
+                                                      id = 'rizlas', 
                                                       latitude = lat, 
                                                       longitude = lon,
                                                       live_period = 60,
@@ -247,7 +247,7 @@ def inlinequery(bot, update):
     logger.info(query)
 
     if query:
-        if query.lower() == 'carac':
+        if query.lower() == 'rizlas':
           easteregg(bot, update, 'inline', query)
           return
 
