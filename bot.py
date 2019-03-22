@@ -319,8 +319,7 @@ def help(bot, update):
     logger.info(help_text)
 
     bot.send_message(chat_id = chat_id, 
-                     text = help_text,
-                     parse_mode = 'HTML')
+                     text = help_text)
 
 # show infos about bot
 
