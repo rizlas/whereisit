@@ -149,6 +149,9 @@ def f_location(bot, update, args):
     logger.info('User input: {0}'.format(user_input))
 
     api_url = '{0}{1}, {2}.json?key={2}'.format(api_url_base_reverse_geocode, lat, lon, api_key)
+
+    logger.info("Api requests url: {0}".format(api_url)
+
     response = requests.get(api_url)
 
     if response.status_code == 200:
