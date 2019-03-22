@@ -1,6 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultLocation, InputVenueMessageContent
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler, MessageHandler, Filters
 from location import Location
+from emoji import emojize
 #from uuid import uuid4
 import requests
 import re
@@ -326,14 +327,8 @@ def info(bot, update):
     chat_id = update.message.chat_id
     info_text = os.environ['Info_Text']
 
-    logger.info(info_text)
-    logger.info("\n")
-    logger.info(info_text.decode('utf-8'))
-    logger.info("\n")
-    logger.info(info_text.encode('utf-8'))
-
     bot.send_message(chat_id = chat_id, 
-                     text = info_text.decode('utf-8'),
+                     text = emojize(info_text, use_aliases = True),
                      parse_mode = 'HTML')
 
 # Log Errors caused by Updates

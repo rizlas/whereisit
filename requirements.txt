@@ -1,3 +1,4 @@
 # List of required packages (Dependencies)
 requests
 python-telegram-bot
+emoji
