@@ -111,14 +111,14 @@ def CoordinatesSearch(lat, lon):
   if status_code == 200:
     json_data = json.loads(response.content.decode('utf-8'))
 
-    if json_data['addresses'][0]['address']['country'] is not None:
+    if json_data['addresses'][0]['address'].get('country') is not None:
       title = json_data['addresses'][0]['address']['country']
-      if json_data['addresses'][0]['address']['countrySubdivision'] is not None:
+      if json_data['addresses'][0]['address'].get('countrySubdivision') is not None:
         title += ", " + json_data['addresses'][0]['address']['countrySubdivision']
     else:
       title = "{0}, {1}".format(lat, lon)
 
-    if json_data['addresses'][0]['address']['freeformAddress'] is not None:
+    if json_data['addresses'][0]['address'].get('freeformAddress') is not None:
       address = json_data['addresses'][0]['address']['freeformAddress']
     else:
       address = "{0}, {1}".format(lat, lon)
