@@ -110,6 +110,11 @@ def where(bot, update, args):
     else:
         user_input = args
 
+    #easter here
+    if user_input == 'carac':
+      easteregg(bot, update, 'where', user_input)
+      return
+
     logger.info('User input: {0}'.format(user_input))
 
     ret = get_locations(user_input)
@@ -145,7 +150,6 @@ def f_location(bot, update, args):
     chat_id = update.message.chat_id
     user_input = " ".join(args)
     lat, lon = user_input.split(',')
-    json_data = None
 
     logger.info('User input: {0}'.format(user_input))
 
@@ -206,6 +210,35 @@ def button(bot, update):
     # NOTE: After the user presses a callback button, Telegram clients will display a progress bar until you call answerCallbackQuery. It is, therefore, necessary to react by calling answerCallbackQuery even if no notification to the user is needed (e.g., without specifying any of the optional parameters).
     bot.answer_callback_query(callback_query_id = update.callback_query.id)
 
+def easteregg(bot, update, fro_m, query):
+    lat = -27.122295
+    lon = -109.288839
+
+    title = "You've searched: " + query.capitalize()
+    address = 'Here is WhereIsItMapBot Easter Egg'
+
+    if fro_m == 'where':
+      bot.send_venue(chat_id = chat_id, 
+                     latitude = lat, 
+                     longitude = lon,
+                     title = title,
+                     address = address)
+    elif fro_m == 'inline':
+      easter_results = []
+      easter_results.append(InlineQueryResultLocation(type = 'location', 
+                                                      id = 'carac', 
+                                                      latitude = lat, 
+                                                      longitude = lon,
+                                                      live_period = 60,
+                                                      input_message_content = InputVenueMessageContent(latitude = lat, 
+                                                                                                       longitude = lon, 
+                                                                                                       title = "You've searched: " + query.capitalize(), 
+                                                                                                       address = 'Here is WhereIsItMapBot Easter Egg'),
+                                                      title = 'Click me to find out!'))
+
+      bot.answerInlineQuery(update.inline_query.id, easter_results)
+
+
 # inline query via @botname query
 
 def inlinequery(bot, update):
@@ -215,21 +248,7 @@ def inlinequery(bot, update):
 
     if query:
         if query.lower() == 'carac':
-          easter_results = []
-          lat = -27.122295
-          lon = -109.288839
-          easter_results.append(InlineQueryResultLocation(type = 'location', 
-                                                          id = 'carac', 
-                                                          latitude = lat, 
-                                                          longitude = lon,
-                                                          live_period = 60,
-                                                          input_message_content = InputVenueMessageContent(latitude = lat, 
-                                                                                                           longitude = lon, 
-                                                                                                           title = "You've searched: " + query.capitalize(), 
-                                                                                                           address = 'Here is WhereIsItMapBot Easter Egg'),
-                                                          title = 'Click me to find out!'))
-
-          bot.answerInlineQuery(update.inline_query.id, easter_results)
+          easteregg(bot, update, 'inline', query)
           return
 
         ret = get_locations(query)
