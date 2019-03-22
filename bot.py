@@ -287,8 +287,8 @@ def inlinequery(bot, update):
           results = []
           results.append(InlineQueryResultLocation(type = 'location', 
                                                    id = 'single_location', 
-                                                   latitude = lat, 
-                                                   longitude = lon,
+                                                   latitude = float(lat), 
+                                                   longitude = float(lon),
                                                    live_period = 60,
                                                    input_message_content = InputVenueMessageContent(latitude = lat, 
                                                                                                     longitude = lon, 
