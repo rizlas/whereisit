@@ -328,12 +328,12 @@ def info(bot, update):
 
     logger.info(info_text)
     logger.info("\n")
-    logger.info(info_text.decode('utf8'))
+    logger.info(info_text.decode('utf-8'))
     logger.info("\n")
-    logger.info(info_text.encode('utf8'))
+    logger.info(info_text.encode('utf-8'))
 
     bot.send_message(chat_id = chat_id, 
-                     text = info_text.decode('utf8'),
+                     text = info_text.decode('utf-8'),
                      parse_mode = 'HTML')
 
 # Log Errors caused by Updates
