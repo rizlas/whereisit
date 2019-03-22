@@ -280,7 +280,7 @@ def inlinequery(bot, update):
     if "," in query:
       if isCoordinatesSearch(query):
         logger.info("isCoordinatesSearch True")
-        lat, lon = user_input.split(',')
+        lat, lon = query.split(',')
         status_code, title, address = CoordinatesSearch(lat, lon)
 
         if status_code == 200:
