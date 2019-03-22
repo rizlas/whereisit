@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 token = os.environ['TELEGRAM_TOKEN']
 api_key = os.environ['Map_Service_Api_Key']
-api_url_base = os.environ['Api_Url_Base']
+api_url_base_geocode = os.environ['Api_Url_Base_Geocode']
+api_url_base_reverse_geocode = os.environ['Api_Url_Base_Reverse_Geocode']
 map_emoji = '\U0001F5FA'
 data_json = None
 
@@ -32,8 +33,8 @@ port = int(os.environ.get('PORT', '8443'))
 # Try to put business logic in this section :|
 
 def get_locations(param):
-    api_url = '{0}{1}.json?key={2}'.format(api_url_base, param, api_key)
-    logger.info('Api url: {0}'.format(api_url_base))
+    api_url = '{0}{1}.json?key={2}'.format(api_url_base_geocode, param, api_key)
+    logger.info('Api url: {0}'.format(api_url_base_geocode))
     response = requests.get(api_url)
 
     if response.status_code == 200:
@@ -139,6 +140,33 @@ def where(bot, update, args):
                          text = 'An error has occured')
 
     #bot.send_location(chat_id=chat_id, latitude=37.3399964, longitude=-4.5811614)
+
+def f_location(bot, update, args):
+    chat_id = update.message.chat_id
+    user_input = " ".join(args.split())
+    lat, lon = user_input.split(',')
+
+    logger.info('User input: {0}'.format(user_input))
+
+    api_url = '{0}{1}, {2}.json?key={2}'.format(api_url_base_reverse_geocode, lat, lon, api_key)
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        json = json.loads(response.content.decode('utf-8'))
+        title = "{0}, {1}".format(json['addresses'][0]['address']['country'], json['addresses'][0]['address']['countrySubdivision'])
+        address = json['addresses'][0]['address']['freeformAddress']
+
+        bot.send_venue(chat_id = chat_id, 
+                       latitude = float(lat), 
+                       longitude = float(lon),
+                       title = title,
+                       address = address)
+    elif response.status_code == 400:
+        bot.send_message(chat_id = chat_id, 
+                         text = "One or more parameters were incorrectly specified.")
+    else:
+        bot.send_message(chat_id = chat_id, 
+                         text = 'An error has occured')
 
 # inline keyboard callback
 
@@ -279,6 +307,8 @@ def main():
     dp.add_handler(CommandHandler('where', where, pass_args = True))
     dp.add_handler(CallbackQueryHandler(button))
 
+    dp.add_handler(CommandHandler('location', f_location, pass_args = True))
+
     dp.add_handler(CommandHandler('info', info))
     dp.add_handler(CommandHandler('help', help))
 
@@ -306,12 +336,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# todo
-
-# new format for american addresses
-# check uk addresses
-# check russian addresses
-# tests with most common city name
-
-# send location with coordinates as params
