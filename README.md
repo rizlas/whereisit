@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/worldwide.png" width="100" height="100" /> WhereIsItMapBot
+# <div align="center"><img src="https://raw.githubusercontent.com/rizlas/whereisit/master/worldwide.png" width="100" height="100" /><br /> WhereIsItMapBot</div>
 
 WhereIsItMapBot is a Telegram bot that show where a place is on the map. It is based on python and python-telegram-bot library.
 Location geocoding are accomplished through TomTom's Api.
