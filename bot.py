@@ -156,12 +156,6 @@ def where(bot, update, args):
     else:
         user_input = args
 
-    #################################################
-    if user_input == 'rizlas':
-      easteregg(bot, update, 'where', user_input)
-      return
-    #################################################
-
     logger.info('User input: {0}'.format(user_input))
 
     ret = get_locations(user_input)
