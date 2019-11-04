@@ -184,7 +184,6 @@ def where(bot, update, args):
     user_input = ""
 
     user_input = " ".join(args) if isinstance(args, list) else args
-
     logger.info("User input: " + user_input)
 
     ret = get_locations(user_input)
