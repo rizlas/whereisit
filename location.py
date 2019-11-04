@@ -1,31 +1,56 @@
 class Location:
-	def __init__(self, Id, address, country, countrySubdivision, countrySecondarySubdivision, countrySubdivisionName, latitude, longitude, locType):
-		self.id = Id
-		self.address = address
-		self.country = country
-		self.countrySubdivision = countrySubdivision
-		self.countrySecondarySubdivision = countrySecondarySubdivision
-		self.countrySubdivisionName = countrySubdivisionName
-		self.latitude = latitude
-		self.longitude = longitude
-		self.locType = locType
+    def __init__(
+        self,
+        location_id,
+        address,
+        country,
+        country_subdivision,
+        country_secondary_subdivision,
+        country_subdivison_name,
+        latitude,
+        longitude,
+        loc_type,
+    ):
+        self.location_id = location_id
+        self.address = address
+        self.country = country
+        self.country_subdivision = country_subdivision
+        self.country_secondary_subdivision = country_secondary_subdivision
+        self.country_subdivison_name = country_subdivison_name
+        self.latitude = latitude
+        self.longitude = longitude
+        self.loc_type = loc_type
 
-	def subDivision(self):
-		string_ret = ""
+    def sub_division(self):
+        string_ret = ""
 
-		if self.countrySubdivision is not None:
-			string_ret = self.countrySubdivision
-			if self.countrySubdivisionName is not None:
-				string_ret += " ({0})".format(self.countrySubdivisionName)
-			if self.countrySecondarySubdivision is not None:
-				string_ret += ", {0}".format(self.countrySecondarySubdivision)
+        if self.country_subdivision is not None:
+            string_ret = self.country_subdivision
+            if self.country_subdivison_name is not None:
+                string_ret += " ({0})".format(self.country_subdivison_name)
+            if self.country_secondary_subdivision is not None:
+                string_ret += ", {0}".format(self.country_secondary_subdivision)
 
-		return string_ret
+        return string_ret
 
-	def toString(self):
-		if self.countrySubdivision is not None:
-			return "<b>Address: {0}\n</b>Country: {1} - {2}\nLat: {3} Lon: {4}\nType: {5}\n<i>Show:</i> /{6}\n".format(self.address, self.country, self.subDivision(), self.latitude, self.longitude, self.locType, self.id)
-		else:
-			return "<b>Address: {0}\n</b>Country: {1}\nLat: {2} Lon: {3}\nType: {4}\n<i>Show:</i> /{5}\n".format(self.address, self.country, self.latitude, self.longitude, self.locType, self.id)
+    def __str__(self):
+        if self.country_subdivision is not None:
+            string_repr = (
+                f"<b>Address: {self.address}\n"
+                f"</b>Country: {self.country} - {self.sub_division()}\n"
+                f"Lat: {self.latitude} Lon: {self.longitude}\n"
+                f"Type: {self.loc_type}\n"
+                f"<i>Show:</i> /{self.location_id}\n"
+            )
+            return string_repr
+        else:
+            string_repr = (
+                f"<b>Address: {self.address}\n"
+                f"</b>Country: {self.country}\n"
+                f"Lat: {self.latitude} Lon: {self.longitude}\n"
+                f"Type: {self.loc_type}\n"
+                f"<i>Show:</i> /{self.location_id}\n"
+            )
 
-# 
+            return string_repr
+
