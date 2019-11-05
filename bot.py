@@ -17,9 +17,25 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 token = os.environ['TELEGRAM_TOKEN']
+port = int(os.environ.get('PORT', '8443'))
 api_key = os.environ['Map_Service_Api_Key']
 api_url_base_geocode = os.environ['Api_Url_Base_Geocode']
 api_url_base_reverse_geocode = os.environ['Api_Url_Base_Reverse_Geocode']
+mode = os.environ['MODE']
+
+if mode == 'develop':
+    def run(updater):
+        updater.start_polling()
+elif mode == 'production':
+    def run(updater):
+        updater.start_webhook(listen = "0.0.0.0",
+                            port = port,
+                            url_path = token)
+        updater.bot.set_webhook("https://whereisitbot.herokuapp.com/" + token)
+else:
+    logger.error('You need to specify a working mode')
+
+
 map_emoji = '\U0001F5FA'
 data_json = None
 
@@ -28,8 +44,6 @@ location_count = 0
 
 message_title = "<b>Showing results for "
 message_title_tail = "</b>\n\n"
-
-port = int(os.environ.get('PORT', '8443'))
 
 # Try to put business logic in this section :|
 
@@ -448,10 +462,7 @@ def main():
     # log all errors
     dp.add_error_handler(error)
 
-    updater.start_webhook(listen = "0.0.0.0",
-                          port = port,
-                          url_path = token)
-    updater.bot.set_webhook("https://whereisitbot.herokuapp.com/" + token)
+    run(updater)
 
     # Block until the user presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
