@@ -358,7 +358,7 @@ def error(update, context):
 
 
 def main():
-    updater = Updater(token)
+    updater = Updater(token, use_context=True)
 
     # Dispatcher for handlers
     dp = updater.dispatcher
