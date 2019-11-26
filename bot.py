@@ -3,6 +3,9 @@ from telegram import (
     InlineKeyboardMarkup,
     InlineQueryResultLocation,
     InputVenueMessageContent,
+    InlineQueryResultArticle,
+    InlineQueryResultPhoto,
+    InputTextMessageContent,
 )
 from telegram.ext import (
     Updater,
@@ -14,14 +17,15 @@ from telegram.ext import (
 )
 from location import Location
 from emoji import emojize
+from uuid import uuid4
+from config import *
 
-# from uuid import uuid4
+import logic
 import requests
 import re
 import json
 import logging
 import math
-import os
 
 # Enable logging
 logging.basicConfig(
@@ -30,91 +34,28 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# TODO move to config file
-# TODO remove global variables
-token = os.environ["TELEGRAM_TOKEN"]
-api_key = os.environ["Map_Service_Api_Key"]
-api_url_base_geocode = os.environ["Api_Url_Base_Geocode"]
-api_url_base_reverse_geocode = os.environ["Api_Url_Base_Reverse_Geocode"]
-map_emoji = "\U0001F5FA"
-mode = os.environ["MODE"]
-port = int(os.environ.get("PORT", "8443"))
-data_json = None
+if mode == "develop":
 
-if mode == 'develop':
     def run(updater):
         updater.start_polling()
-elif mode == 'production':
-    def run(updater):
-        updater.start_webhook(listen = "0.0.0.0",
-                            port = port,
-                            url_path = token)
-        updater.bot.set_webhook("https://whereisitbot.herokuapp.com/" + token)
-else:
-    logger.error('You need to specify a working mode')
 
-locations = []
-location_count = 0
+
+elif mode == "production":
+
+    def run(updater):
+        updater.start_webhook(listen="0.0.0.0", port=port, url_path=token)
+        updater.bot.set_webhook("https://whereisitbot.herokuapp.com/" + token)
+
+
+else:
+    logger.error("You need to specify a working mode")
 
 message_title = "<b>Showing results for "
 message_title_tail = "</b>\n\n"
 
-# Try to put business logic in this section :|
-def get_locations(param):
-    # TODO add docstring
-    api_url = f"{api_url_base_geocode}{param}.json?key={api_key}"
-    logger.info("Api url: " + api_url_base_geocode)
-    response = requests.get(api_url)
-
-    if response.status_code == 200:
-        global data_json
-        global location_count
-        global locations
-
-        data_json = json.loads(response.content.decode("utf-8"))
-        location_count = int(data_json["summary"]["numResults"])
-        locations = []
-
-        if location_count > 0:
-            for i in data_json["results"]:
-                loc_tmp = Location(
-                    location_id=i["id"].replace("/", "_"),
-                    address=i["address"]["freeformAddress"],
-                    country=i["address"]["country"],
-                    country_subdivision=None,
-                    country_secondary_subdivision=None,
-                    country_subdivision_name=None,
-                    latitude=i["position"]["lat"],
-                    longitude=i["position"]["lon"],
-                    locType=i["type"],
-                )
-
-                if i["address"].get("country_subdivision") is not None:
-                    loc_tmp.country_subdivision = i["address"]["country_subdivision"]
-
-                if i["address"].get("country_secondary_subdivision") is not None:
-                    loc_tmp.country_secondary_subdivision = i["address"][
-                        "country_secondary_subdivision"
-                    ]
-
-                if i["address"].get("country_subdivision_name") is not None:
-                    loc_tmp.country_subdivision_name = i["address"][
-                        "country_subdivision_name"
-                    ]
-
-                locations.append(loc_tmp)
-
-            return response.status_code
-
-        else:
-            return 204  # HTTP No content
-    else:
-        logger.error("Error response code: " + response.status_code)
-        return response.status_code
-
 
 # Inline keyboard generator
-def inline_keyboard(user_input, key_selected=0):
+def inline_keyboard(user_input, location_count, key_selected=0):
     # TODO add docstring
     buttonNumber = math.ceil(int(location_count) / 3)
     reply_markup = None
@@ -138,70 +79,22 @@ def inline_keyboard(user_input, key_selected=0):
     return reply_markup
 
 
-def coordinate_search(lat, lon):
-    # TODO add docstring
-    api_url = f"{api_url_base_reverse_geocode}{lat}, {lon}.json?key={api_key}"
-
-    logger.info("Api requests url: " + api_url)
-
-    response = requests.get(api_url)
-    status_code = response.status_code
-
-    if status_code == 200:
-        json_data = json.loads(response.content.decode("utf-8"))
-
-        if json_data["addresses"][0]["address"].get("country") is not None:
-            title = json_data["addresses"][0]["address"]["country"]
-            if (
-                json_data["addresses"][0]["address"].get("countrySubdivision")
-                is not None
-            ):
-                title += (
-                    ", " + json_data["addresses"][0]["address"]["countrySubdivision"]
-                )
-        else:
-            title = "{0}, {1}".format(lat, lon)
-
-        if json_data["addresses"][0]["address"].get("freeformAddress") is not None:
-            address = json_data["addresses"][0]["address"]["freeformAddress"]
-        else:
-            address = "{0}, {1}".format(lat, lon)
-
-        return status_code, title, address
-    elif status_code == 400:
-        return status_code, "One or more parameters were incorrectly specified.", ""
-    else:
-        return status_code, "An error has occured", ""
-
-
-def is_coordinate_search(param):
-    # TODO add docstring
-    lat, lon = param.split(",")
-    logger.info("is_coordinate_search: " + param)
-
-    lat = lat.strip()
-    lon = lon.strip()
-
-    try:
-        float(lat)
-        float(lon)
-        return True
-    except ValueError:
-        return False
-
-
-def where(bot, update, args):
+def where(update, context):
     # TODO add docstring
     chat_id = update.message.chat_id
-    user_input = ""
 
-    user_input = " ".join(args) if isinstance(args, list) else args
+    user_input = (
+        " ".join(context.args) if isinstance(context.args, list) else context.args
+    )
+
     logger.info("User input: " + user_input)
 
-    ret = get_locations(user_input)
+    status_code, locations, location_count = logic.get_locations(
+        user_input, api_url_base_geocode, api_key
+    )
 
-    if ret == 200:
-        reply_markup = inline_keyboard(user_input)
+    if status_code == 200:
+        reply_markup = inline_keyboard(user_input, location_count)
 
         # Message with only first three results
         message = f"{message_title}'{user_input}'{message_title_tail}"
@@ -209,66 +102,81 @@ def where(bot, update, args):
         for location in locations[:3]:
             message += f"{map_emoji} {location}\n\n"
 
-        bot.send_message(
+        context.bot.send_message(
             chat_id=chat_id, text=message, parse_mode="HTML", reply_markup=reply_markup
         )
 
-    elif ret == 204:
-        bot.send_message(
+    elif status_code == 204:
+        context.bot.send_message(
             chat_id=chat_id, text="No locations was found for '{user_input}'"
         )
     else:
-        bot.send_message(chat_id=chat_id, text="An error has occured")
+        context.bot.send_message(chat_id=chat_id, text="An error has occured")
 
 
 # Location with coordinates
-def f_location(bot, update, args):
+def f_location(update, context):
     # TODO add docstring
 
     chat_id = update.message.chat_id
-    user_input = " ".join(args)
+    user_input = " ".join(context.args)
     lat, lon = user_input.split(",")
 
-    logger.info("User input: " + user_input)
+    if logic.lat_lon_parse(lat, lon):
+        logger.info("User input: " + user_input)
 
-    status_code, title, address = coordinate_search(lat, lon)
+        status_code, title, address = logic.coordinate_search(
+            lat, lon, api_url_base_reverse_geocode, api_key
+        )
 
-    if status_code == 200:
-        bot.send_venue(
-            chat_id=chat_id,
-            latitude=float(lat),
-            longitude=float(lon),
-            title=title,
-            address=address,
-        )
-    elif status_code == 400:
-        bot.send_message(
-            chat_id=chat_id, text="One or more parameters were incorrectly specified."
-        )
+        if status_code == 200:
+            context.bot.send_venue(
+                chat_id=chat_id,
+                latitude=float(lat),
+                longitude=float(lon),
+                title=title,
+                address=address,
+            )
+        elif status_code == 400:
+            context.bot.send_message(chat_id=chat_id, text=title)
+        else:
+            context.bot.send_message(chat_id=chat_id, text=title)
     else:
-        bot.send_message(chat_id=chat_id, text="An error has occured")
+        context.bot.send_message(chat_id=chat_id, text="Unformed input!")
 
 
 # Inline keyboard callback
-def button(bot, update):
+def button(update, context):
     # TODO add docstring
+    logger.info(update.callback_query.data)
+
     query = (
         update.callback_query
     )  # Contains data on the message including user information
+
     key_selected, user_input = query.data.split(":")
+    status_code, locations, location_count = logic.get_locations(
+        user_input, api_url_base_geocode, api_key
+    )
 
-    message = f"{message_title}'{user_input}'{message_title_tail}"
+    if status_code == 200:
+        message = f"{message_title}'{user_input}'{message_title_tail}"
 
-    for i in range(len(locations)):
-        # TODO can change with range(math.ceil(i + 1) / 3) ?
-        a = math.ceil((i + 1) / 3)
-        if a == int(key_selected):
-            message += f"{map_emoji} {locations[i]}\n\n"
-        elif a > int(key_selected):
-            break
+        for i in range(len(locations)):
+            x = math.ceil((i + 1) / 3)
+            if x == int(key_selected):
+                message += f"{map_emoji} {locations[i]}\n\n"
+            elif x > int(key_selected):
+                break
 
-    reply_markup = inline_keyboard(user_input, int(key_selected) - 1)
-    query.edit_message_text(text=message, parse_mode="HTML", reply_markup=reply_markup)
+        reply_markup = inline_keyboard(
+            user_input, location_count, int(key_selected) - 1
+        )
+        query.edit_message_text(
+            text=message, parse_mode="HTML", reply_markup=reply_markup
+        )
+    else:
+        query.edit_message_text(text="An error has occured", parse_mode="HTML")
 
     # NOTE: After the user presses a callback button,
     # Telegram clients will display a progress bar until
@@ -276,20 +184,22 @@ def button(bot, update):
     # It is, therefore, necessary to react by calling
     # answerCallbackQuery even if no notification to the user is needed
     # (e.g., without specifying any of the optional parameters).
-    bot.answer_callback_query(callback_query_id=update.callback_query.id)
+    context.bot.answer_callback_query(callback_query_id=query.id)
 
 
 # Inline query via @botname query
-def inlinequery(bot, update):
+def inlinequery(update, context):
     """Handle the inline query."""
     query = update.inline_query.query.strip()
     logger.info(query)
 
     if "," in query:
-        if is_coordinate_search(query):
+        if logic.is_coordinate_search(query):
             logger.info("is_coordinate_search True")
             lat, lon = query.split(",")
-            status_code, title, address = coordinate_search(lat, lon)
+            status_code, title, address = logic.coordinate_search(
+                lat, lon, api_url_base_reverse_geocode, api_key
+            )
 
             logger.info(f"{lat} {lon}\n{status_code}\n{title}\n{address}")
 
@@ -312,12 +222,11 @@ def inlinequery(bot, update):
                     )
                 )
 
-                bot.answerInlineQuery(update.inline_query.id, results)
+                context.bot.answerInlineQuery(update.inline_query.id, results)
                 return
             elif status_code == 400:
                 results = []
                 results.append(
-                    # FIXME this classes are not even imported, why are they here?
                     InlineQueryResultArticle(
                         id="single_location",
                         title=title,
@@ -325,7 +234,7 @@ def inlinequery(bot, update):
                     )
                 )
 
-                bot.answerInlineQuery(update.inline_query.id, results)
+                context.bot.answerInlineQuery(update.inline_query.id, results)
             else:
                 results = []
                 results.append(
@@ -336,16 +245,18 @@ def inlinequery(bot, update):
                     )
                 )
 
-                bot.answerInlineQuery(update.inline_query.id, results)
+                context.bot.answerInlineQuery(update.inline_query.id, results)
     elif query:
-        ret = get_locations(query)
+        status_code, locations, _ = logic.get_locations(
+            query, api_url_base_geocode, api_key
+        )
 
-        if ret == 200:
-            results = []
+        if status_code == 200:
+            inline_result = []
             address_venue_str = ""
             title_str = ""
             for location in locations:
-                address_venue_str = location.subDivision()
+                address_venue_str = location.sub_division()
                 title_str = f"{location.address}, {location.country}"
 
                 if address_venue_str == "":
@@ -353,10 +264,10 @@ def inlinequery(bot, update):
                 else:
                     title_str += f" ({address_venue_str})"
 
-                results.append(
+                inline_result.append(
                     InlineQueryResultLocation(
                         type="location",
-                        id=location.id,
+                        id=location.location_id,
                         latitude=location.latitude,
                         longitude=location.longitude,
                         live_period=60,
@@ -370,64 +281,75 @@ def inlinequery(bot, update):
                     )
                 )
 
-            bot.answerInlineQuery(update.inline_query.id, results)
+            context.bot.answerInlineQuery(update.inline_query.id, inline_result)
+        elif status_code == 204:
+            inline_result = []
+            inline_result.append(
+                InlineQueryResultArticle(
+                    type="article",
+                    id=str(uuid4()),
+                    title="What are you searching?",
+                    input_message_content=InputTextMessageContent(
+                        "You need to add more infos in your inline query."
+                    ),
+                    thumb_url=image_url,
+                )
+            )
+
+            context.bot.answerInlineQuery(update.inline_query.id, inline_result)
 
 
 # Show location selected on bot answer
-def startswithslash(bot, update):
+def startswithslash(update, context):
     user_message = update.message.text[1:]
     chat_id = update.message.chat_id
 
-    for location in locations:
-        if location.id == user_message:
-            bot.send_location(
-                chat_id=chat_id,
-                latitude=location.latitude,
-                longitude=location.longitude,
-            )
-            break
-    else:
-        bot.send_message(
+    try:
+        lat, lon = logic.decode_lat_lon(user_message).split(",")
+
+        assert logic.lat_lon_parse(lat, lon)
+
+        context.bot.send_location(chat_id=chat_id, latitude=lat, longitude=lon)
+    except Exception:
+        context.bot.send_message(
             chat_id=chat_id,
             text=(
                 "I can show you where a location is in the world. "
                 "Simply send me a query like 'Rome' or "
-                "use /where 'location' command",
+                "use /where 'location' command"
             ),
         )
 
 
-def non_command(bot, update):
-    """Handle messages that doesn't starts with / aka messages :D
-    """
-    user_message = update.message.text
-    where(bot, update, user_message)
+def non_command(update, context):
+    """Handle messages that doesn't starts with / aka messages :D"""
+    where(update, context)
 
 
 # Show help message
-def help(bot, update):
+def help(update, context):
     chat_id = update.message.chat_id
     help_text = os.environ["Help_Text"]
 
-    bot.send_message(chat_id=chat_id, text=help_text, parse_mode="HTML")
+    context.bot.send_message(chat_id=chat_id, text=help_text, parse_mode="HTML")
 
 
 # Show infos about bot
-def info(bot, update):
+def info(update, context):
     chat_id = update.message.chat_id
     info_text = os.environ["Info_Text"]
 
-    bot.send_message(
+    context.bot.send_message(
         chat_id=chat_id, text=emojize(info_text, use_aliases=True), parse_mode="HTML"
     )
 
 
 # Show infos about how to use inline mode
-def inline(bot, update):
+def inline(update, context):
     chat_id = update.message.chat_id
     inline_info_text = os.environ["Inline_Info_Text"]
 
-    bot.send_message(chat_id=chat_id, text=inline_info_text, parse_mode="HTML")
+    context.bot.send_message(chat_id=chat_id, text=inline_info_text, parse_mode="HTML")
 
 
 # Log Errors caused by Updates
@@ -436,16 +358,16 @@ def error(update, context):
 
 
 def main():
-    updater = Updater(token)
+    updater = Updater(token, use_context=True)
 
     # Dispatcher for handlers
     dp = updater.dispatcher
 
     # Telegram commands
-    dp.add_handler(CommandHandler("where", where, pass_args=True))
+    dp.add_handler(CommandHandler("where", where))
     dp.add_handler(CallbackQueryHandler(button))
 
-    dp.add_handler(CommandHandler("location", f_location, pass_args=True))
+    dp.add_handler(CommandHandler("location", f_location))
 
     dp.add_handler(CommandHandler("inline", inline))
     dp.add_handler(CommandHandler("info", info))
