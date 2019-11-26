@@ -1,5 +1,5 @@
 # List of required packages (Dependencies)
 requests
-python-telegram-bot
+python-telegram-bot==12.2.0
 emoji
 base58
