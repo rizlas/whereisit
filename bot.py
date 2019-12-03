@@ -26,6 +26,8 @@ import re
 import json
 import logging
 import math
+import sys
+import traceback
 
 # Enable logging
 logging.basicConfig(
@@ -357,7 +359,11 @@ def inline(update, context):
 
 # Log Errors caused by Updates
 def error(update, context):
-    logger.warning(f"Update {update} caused error {context.error}")
+    trace = "".join(traceback.format_tb(sys.exc_info()[2]))
+    log_text = f"Update: {update}\n\ncaused error: {context.error}\n\nTrace: \n{trace}"
+
+    context.bot.send_message(chat_id=chat_dev_id, text=log_text)
+    logger.warning(log_text)
 
 
 def main():

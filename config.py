@@ -8,3 +8,4 @@ api_url_base_reverse_geocode = os.environ["Api_Url_Base_Reverse_Geocode"]
 map_emoji = "\U0001F5FA"
 mode = os.environ["MODE"]
 port = int(os.environ.get("PORT", "8443"))
+chat_dev_id = os.environ["dev_id"]
