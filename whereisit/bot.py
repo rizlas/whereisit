@@ -1,3 +1,8 @@
+import logging
+import math
+import sys
+import traceback
+import logic
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -20,14 +25,6 @@ from emoji import emojize
 from uuid import uuid4
 from config import *
 
-import logic
-import requests
-import re
-import json
-import logging
-import math
-import sys
-import traceback
 
 # Enable logging
 logging.basicConfig(
@@ -41,13 +38,11 @@ if mode == "develop":
     def run(updater):
         updater.start_polling()
 
-
 elif mode == "production":
 
     def run(updater):
         updater.start_webhook(listen="0.0.0.0", port=port, url_path=token)
         updater.bot.set_webhook("https://whereisitbot.herokuapp.com/" + token)
-
 
 else:
     logger.error("You need to specify a working mode")
@@ -92,7 +87,7 @@ def where(update, context):
     if user_input is None:
         user_input = update.message.text
 
-    logger.info("User input: " + user_input)
+    logger.info(f"User input: {user_input}")
 
     status_code, locations, location_count = logic.get_locations(
         user_input, api_url_base_geocode, api_key
@@ -128,7 +123,7 @@ def f_location(update, context):
     lat, lon = user_input.split(",")
 
     if logic.lat_lon_parse(lat, lon):
-        logger.info("User input: " + user_input)
+        logger.info(f"User input: {user_input}")
 
         status_code, title, address = logic.coordinate_search(
             lat, lon, api_url_base_reverse_geocode, api_key
