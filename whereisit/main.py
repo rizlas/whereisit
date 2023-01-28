@@ -1,3 +1,6 @@
+"""
+main.py
+"""
 import logging
 import math
 import sys
@@ -5,6 +8,7 @@ import traceback
 import os
 from uuid import uuid4
 from telegram import (
+    Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     InlineQueryResultLocation,
@@ -19,11 +23,12 @@ from telegram.ext import (
     CallbackQueryHandler,
     MessageHandler,
     filters,
+    ContextTypes,
 )
 from emoji import emojize
 import helpers
 import config as cfg
-from constants import IMAGE_URL, MAP_EMOJI
+from constants import IMAGE_URL, MAP_EMOJI, MESSAGE_TITLE, MESSAGE_TITLE_TAIL
 
 
 # Enable logging
@@ -34,25 +39,40 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-message_title = "<b>Showing results for "
-message_title_tail = "</b>\n\n"
-
-
 # Inline keyboard generator
-def inline_keyboard(user_input, location_count, key_selected=0):
-    # TODO add docstring
-    buttonNumber = math.ceil(int(location_count) / 3)
+def inline_keyboard(
+    user_input: str, location_count: int, key_selected: int = 0
+) -> InlineKeyboardMarkup:
+    """
+    Generated an inline keyboard based on location_count.
+
+    e.g. location_count = 10, 10 / 3 = 3.333 -> math.ceil(3.333) = 4
+    4 button will be generated
+
+    Highlight the button selected with a different text.
+
+    Incapsulate user_input in callback_data (without the keyboard will not work)
+
+    Args:
+        user_input (str): Venue asked by the user
+        location_count (int): How many venue founded by the api
+        key_selected (int, optional): Key selected by the user. Defaults to 0.
+
+    Returns:
+        InlineKeyboardMarkup: Generated keyboard
+    """
+    buttons_count = math.ceil(location_count / 3)
     reply_markup = None
     button_text = ""
 
-    if buttonNumber > 1:
+    if buttons_count > 1:
         keyboard = [[]]
 
-        for i in range(buttonNumber):
+        for i in range(buttons_count):
             if i != key_selected:
-                button_text = "{0}".format(i + 1)
+                button_text = f"{i + 1}"
             else:
-                button_text = "• {0} •".format(i + 1)
+                button_text = f"• {i + 1} •"
 
             keyboard[0].append(
                 InlineKeyboardButton(button_text, callback_data=f"{i+1}:{user_input}")
@@ -63,18 +83,35 @@ def inline_keyboard(user_input, location_count, key_selected=0):
     return reply_markup
 
 
-async def where(update, context):
-    # TODO add docstring
+async def where(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle the command /where. User must specify a query parameter
+    (e.g. /where Roma)
+
+    Param will be searched via TomTom Api and the results
+    will be available via an inline keyboard.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
     chat_id = update.message.chat_id
 
     user_input = (
         " ".join(context.args) if isinstance(context.args, list) else context.args
     )
 
+    logger.info("User input %s", user_input)
+
+    # If input is none, where function was triggered from a non-command
     if user_input is None:
         user_input = update.message.text
 
-    logger.info("User input %s", user_input)
+    if not user_input:
+        await context.bot.send_message(
+            chat_id=chat_id, text="You must specify an input!"
+        )
+        return
 
     status_code, locations, location_count = helpers.get_locations(
         user_input, cfg.api_url_base_geocode, cfg.api_key
@@ -84,7 +121,7 @@ async def where(update, context):
         reply_markup = inline_keyboard(user_input, location_count)
 
         # Message with only first three results
-        message = f"{message_title}'{user_input}'{message_title_tail}"
+        message = f"{MESSAGE_TITLE}'{user_input}'{MESSAGE_TITLE_TAIL}"
 
         for location in locations[:3]:
             message += f"{MAP_EMOJI} {location}\n\n"
@@ -95,19 +132,39 @@ async def where(update, context):
 
     elif status_code == 204:
         await context.bot.send_message(
-            chat_id=chat_id, text="No locations was found for '{user_input}'"
+            chat_id=chat_id, text=f"No locations was found for '{user_input}'"
         )
     else:
         await context.bot.send_message(chat_id=chat_id, text="An error has occured")
 
 
-# Location with coordinates
-async def f_location(update, context):
-    # TODO add docstring
+async def f_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle the command /location. User must input latitude and longitude
+    as decimal and separated by comma.
+
+    /location -27.122295, -109.288839
+
+    Bot will return a Venue object.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
 
     chat_id = update.message.chat_id
     user_input = " ".join(context.args)
-    lat, lon = user_input.split(",")
+
+    try:
+        lat, lon = user_input.split(",")
+    except ValueError:
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="Invalid format use something like: /location -27.122295, -109.288839)",
+        )
+        return
+
+    logger.debug("lat %s, lon %s", lat, lon)
 
     if helpers.lat_lon_parse(lat, lon):
         logger.info("User input %s", user_input)
@@ -133,37 +190,46 @@ async def f_location(update, context):
 
 
 # Inline keyboard callback
-async def button(update, context):
-    # TODO add docstring
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle clicks on inline keyboard. At each click get_locations is called.
+    Results from get_locations are in set of three elements.
+    "Set" number that correspond to the page select is shown.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
     logger.info(update.callback_query.data)
 
     query = (
         update.callback_query
     )  # Contains data on the message including user information
 
-    key_selected, user_input = query.data.split(":")
+    page_selected, user_input = query.data.split(":")
+
     status_code, locations, location_count = helpers.get_locations(
         user_input, cfg.api_url_base_geocode, cfg.api_key
     )
 
     if status_code == 200:
-        message = f"{message_title}'{user_input}'{message_title_tail}"
+        message = f"{MESSAGE_TITLE}'{user_input}'{MESSAGE_TITLE_TAIL}"
 
-        for i in range(len(locations)):
-            x = math.ceil((i + 1) / 3)
-            if x == int(key_selected):
-                message += f"{MAP_EMOJI} {locations[i]}\n\n"
-            elif x > int(key_selected):
+        for i, location in enumerate(locations):
+            current_set = math.ceil((i + 1) / 3)
+            if current_set == int(page_selected):
+                message += f"{MAP_EMOJI} {location}\n\n"
+            elif current_set > int(page_selected):
                 break
 
         reply_markup = inline_keyboard(
-            user_input, location_count, int(key_selected) - 1
+            user_input, location_count, int(page_selected) - 1
         )
-        query.edit_message_text(
+        await query.edit_message_text(
             text=message, parse_mode="HTML", reply_markup=reply_markup
         )
     else:
-        query.edit_message_text(text="An error has occured", parse_mode="HTML")
+        await query.edit_message_text(text="An error has occured", parse_mode="HTML")
 
     # NOTE: After the user presses a callback button,
     # Telegram clients will display a progress bar until
@@ -175,8 +241,14 @@ async def button(update, context):
 
 
 # Inline query via @botname query
-async def inlinequery(update, context):
-    """Handle the inline query."""
+async def inlinequery(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle inline queries. Inline support both lat lon and venue search.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
     query = update.inline_query.query.strip()
     logger.info(query)
 
@@ -205,18 +277,6 @@ async def inlinequery(update, context):
                             address=address,
                         ),
                         title=title,
-                    )
-                )
-
-                await context.bot.answerInlineQuery(update.inline_query.id, results)
-                return
-            elif status_code == 400:
-                results = []
-                results.append(
-                    InlineQueryResultArticle(
-                        id="single_location",
-                        title=title,
-                        input_message_content=InputTextMessageContent(title),
                     )
                 )
 
@@ -284,7 +344,16 @@ async def inlinequery(update, context):
 
 
 # Show location selected on bot answer
-async def startswithslash(update, context):
+async def startswithslash(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle any message that starts with a forward slash.
+    Main purpose of this function is the handling of encoded location queries
+    generated by a where command.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
     user_message = update.message.text[1:]
     chat_id = update.message.chat_id
 
@@ -305,21 +374,42 @@ async def startswithslash(update, context):
         )
 
 
-def non_command(update, context):
-    """Handle messages that doesn't starts with / aka messages :D"""
-    where(update, context)
+async def non_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle messages that doesn't starts with / aka messages :D
+    Shortcut to where.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
+    await where(update, context)
 
 
-# Show help message
-async def help(update, context):
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Shows the help message.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
+
     chat_id = update.message.chat_id
     help_text = os.environ["HELP_TEXT"]
 
     await context.bot.send_message(chat_id=chat_id, text=help_text, parse_mode="HTML")
 
 
-# Show infos about bot
-async def info(update, context):
+async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Shows the info message.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
+
     chat_id = update.message.chat_id
     info_text = os.environ["INFO_TEXT"]
 
@@ -328,8 +418,15 @@ async def info(update, context):
     )
 
 
-# Show infos about how to use inline mode
-async def inline(update, context):
+async def inline(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Show infos about how to use inline mode
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
+
     chat_id = update.message.chat_id
     inline_info_text = os.environ["INLINE_INFO_TEXT"]
 
@@ -338,8 +435,15 @@ async def inline(update, context):
     )
 
 
-# Log Errors caused by Updates
-async def error(update, context):
+async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handle errors generated by any incoming update and warn bot user and developer.
+
+    Args:
+        update (Update): Incoming update
+        context (ContextTypes.DEFAULT_TYPE): Context object
+    """
+
     # User
     chat_id = update.message.chat_id
     error_text = os.environ["ERROR_TEXT"]
@@ -355,6 +459,9 @@ async def error(update, context):
 
 
 def main():
+    """
+    Entry point
+    """
     mode = os.getenv("MODE")
     application = ApplicationBuilder().token(cfg.token).build()
 
@@ -366,7 +473,7 @@ def main():
 
     application.add_handler(CommandHandler("inline", inline))
     application.add_handler(CommandHandler("info", info))
-    application.add_handler(CommandHandler("help", help))
+    application.add_handler(CommandHandler("help", help_command))
 
     # Inline query handler (via @botname query)
     application.add_handler(InlineQueryHandler(inlinequery))
