@@ -1,6 +1,6 @@
 import logging
-import requests
 import json
+import requests
 import base58
 
 from location import Location
@@ -17,7 +17,7 @@ def coordinate_search(lat, lon, api_url_base_reverse_geocode, api_key):
     # TODO add docstring
     api_url = f"{api_url_base_reverse_geocode}{lat}, {lon}.json?key={api_key}"
 
-    logger.info("Api requests url: " + api_url)
+    logger.info("Api requests url: %s", api_url)
 
     response = requests.get(api_url)
     status_code = response.status_code
@@ -35,12 +35,12 @@ def coordinate_search(lat, lon, api_url_base_reverse_geocode, api_key):
                     ", " + json_data["addresses"][0]["address"]["countrySubdivision"]
                 )
         else:
-            title = "{0}, {1}".format(lat, lon)
+            title = f"{lat}, {lon}"
 
         if json_data["addresses"][0]["address"].get("freeformAddress") is not None:
             address = json_data["addresses"][0]["address"]["freeformAddress"]
         else:
-            address = "{0}, {1}".format(lat, lon)
+            address = f"{lat}, {lon}"
 
         return status_code, title, address
     elif status_code == 400:
@@ -52,7 +52,7 @@ def coordinate_search(lat, lon, api_url_base_reverse_geocode, api_key):
 def get_locations(param, api_url_base_geocode, api_key):
     # TODO add docstring
     api_url = f"{api_url_base_geocode}{param}.json?key={api_key}"
-    logger.info("Api url: " + api_url_base_geocode)
+    logger.info("Api url: %s", api_url_base_geocode)
     response = requests.get(api_url)
 
     if response.status_code == 200:
@@ -60,7 +60,7 @@ def get_locations(param, api_url_base_geocode, api_key):
         location_count = int(data_json["summary"]["numResults"])
         locations = []
 
-        logger.info("COUNT " + str(location_count))
+        logger.info("COUNT %s", location_count)
 
         if location_count > 0:
             for i in data_json["results"]:
@@ -93,10 +93,9 @@ def get_locations(param, api_url_base_geocode, api_key):
 
             return response.status_code, locations, location_count
 
-        else:
-            return 204, None, None  # HTTP No content
+        return 204, None, None  # HTTP No content
     else:
-        logger.error("Error response code: " + response.status_code)
+        logger.error("Error response code: %s", response.status_code)
         return response.status_code, None, None
 
 
@@ -123,6 +122,6 @@ def lat_lon_parse(lat, lon):
 def is_coordinate_search(param):
     # TODO add docstring
     lat, lon = param.split(",")
-    logger.info("is_coordinate_search: " + param)
+    logger.info("is_coordinate_search: %s", param)
 
     return lat_lon_parse(lat, lon)

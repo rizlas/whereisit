@@ -1,3 +1,6 @@
+import helpers
+
+
 class Location:
     def __init__(
         self,
@@ -34,15 +37,13 @@ class Location:
         return string_ret
 
     def __str__(self):
-        import logic
-
         if self.country_subdivision is not None:
             string_repr = (
                 f"<b>Address: {self.address}\n"
                 f"</b>Country: {self.country} - {self.sub_division()}\n"
                 f"Lat: {self.latitude} Lon: {self.longitude}\n"
                 f"Type: {self.loc_type}\n"
-                f"<i>Show:</i> /{logic.encode_lat_lon(self.latitude, self.longitude)}\n"
+                f"<i>Show:</i> /{helpers.encode_lat_lon(self.latitude, self.longitude)}\n"
             )
             return string_repr
         else:
@@ -51,8 +52,7 @@ class Location:
                 f"</b>Country: {self.country}\n"
                 f"Lat: {self.latitude} Lon: {self.longitude}\n"
                 f"Type: {self.loc_type}\n"
-                f"<i>Show:</i> /{logic.encode_lat_lon(self.latitude, self.longitude)}\n"
+                f"<i>Show:</i> /{helpers.encode_lat_lon(self.latitude, self.longitude)}\n"
             )
 
             return string_repr
-
