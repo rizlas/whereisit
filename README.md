@@ -9,6 +9,8 @@ Fell free to make pull requests, fork, destroy or whatever you like most.
 
 Bot here: <https://t.me/WhereIsItMapBot>
 
+Keep in mind that the Ansible part needs some tuning if you want to use the bot in webhook mode!
+
 Thanks also to <https://www.flaticon.com/authors/turkkub> for the awesome logo.\
 <br/>
 <div align="center">
@@ -17,6 +19,7 @@ Thanks also to <https://www.flaticon.com/authors/turkkub> for the awesome logo.\
 <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/inline_bots.jpg" width="50" height="68" />
 <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/Tomtom_logo_250.jpg" width="50" height="50" />
 <img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/ptb-logo_240.png" width="50" height="50" />
+<img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/ansible.png" width="50" height="50" />
 </div>
 
 <br/>

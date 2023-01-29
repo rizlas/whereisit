@@ -1,0 +1,4 @@
+---
+vault_dev_id: a_dev_id
+vault_map_service_api_key: a_tom_tom_api_key
+vault_telegram_token: a_telegram_bot_token

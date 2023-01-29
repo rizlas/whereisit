@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  bot:
+    image: rizl4s/whereisitbot:latest
+    container_name: whereisitbot
+    ports:
+      - 8443
+    env_file:
+      - whereisit.env

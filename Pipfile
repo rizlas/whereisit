@@ -8,6 +8,7 @@ requests = "*"
 python-telegram-bot = "==20.0"
 emoji = "*"
 base58 = "*"
+ansible = "==7.1.0"
 
 [dev-packages]
 black = "*"
