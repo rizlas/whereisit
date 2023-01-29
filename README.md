@@ -1,5 +1,7 @@
 # <div align="center"><img src="https://raw.githubusercontent.com/rizlas/whereisit/master/images/worldwide.png" width="100" height="100" /><br /> WhereIsItMapBot</div>
 
+<img src="https://img.shields.io/badge/python--telegram--bot-20.0-red />
+
 WhereIsItMapBot is a Telegram bot that show where a place is on the map. It is based on python and python-telegram-bot library.
 Location geocoding are accomplished through TomTom's Api.
 
@@ -9,7 +11,8 @@ Fell free to make pull requests, fork, destroy or whatever you like most.
 
 Bot here: <https://t.me/WhereIsItMapBot>
 
-Keep in mind that the Ansible part needs some tuning if you want to use the bot in webhook mode!
+Keep in mind that the Ansible part needs some tuning if you want to use the bot
+in webhook mode (<https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks>)
 
 Thanks also to <https://www.flaticon.com/authors/turkkub> for the awesome logo.\
 <br/>
