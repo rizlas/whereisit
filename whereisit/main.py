@@ -5,7 +5,6 @@ import logging
 import math
 import sys
 import traceback
-import os
 from uuid import uuid4
 from telegram import (
     Update,
@@ -28,7 +27,16 @@ from telegram.ext import (
 from emoji import emojize
 import helpers
 import config as cfg
-from constants import IMAGE_URL, MAP_EMOJI, MESSAGE_TITLE, MESSAGE_TITLE_TAIL
+from constants import (
+    IMAGE_URL,
+    MAP_EMOJI,
+    MESSAGE_TITLE,
+    MESSAGE_TITLE_TAIL,
+    INFO_TEXT,
+    INLINE_INFO_TEXT,
+    HELP_TEXT,
+    ERROR_TEXT,
+)
 
 
 # Enable logging
@@ -396,7 +404,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     chat_id = update.message.chat_id
-    help_text = os.environ["HELP_TEXT"]
+    help_text = HELP_TEXT
 
     await context.bot.send_message(chat_id=chat_id, text=help_text, parse_mode="HTML")
 
@@ -411,7 +419,7 @@ async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     chat_id = update.message.chat_id
-    info_text = os.environ["INFO_TEXT"]
+    info_text = INFO_TEXT
 
     await context.bot.send_message(
         chat_id=chat_id, text=emojize(info_text), parse_mode="HTML"
@@ -428,7 +436,7 @@ async def inline(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     chat_id = update.message.chat_id
-    inline_info_text = os.environ["INLINE_INFO_TEXT"]
+    inline_info_text = INLINE_INFO_TEXT
 
     await context.bot.send_message(
         chat_id=chat_id, text=inline_info_text, parse_mode="HTML"
@@ -446,7 +454,7 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # User
     chat_id = update.message.chat_id
-    error_text = os.environ["ERROR_TEXT"]
+    error_text = ERROR_TEXT
     await context.bot.send_message(chat_id=chat_id, text=error_text, parse_mode="HTML")
 
     # Developer
@@ -455,7 +463,8 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     logger.warning(log_text)
 
-    await context.bot.send_message(chat_id=cfg.CHAT_DEV_ID, text=log_text)
+    if cfg.CHAT_DEV_ID:
+        await context.bot.send_message(chat_id=cfg.CHAT_DEV_ID, text=log_text)
 
 
 def main():
