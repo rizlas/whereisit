@@ -1,9 +1,20 @@
+"""
+config.py
+"""
 import os
 
-token = os.environ["TELEGRAM_TOKEN"]
-api_key = os.environ["MAP_SERVICE_API_KEY"]
-api_url_base_geocode = os.environ["API_URL_BASE_GEOCODE"]
-api_url_base_reverse_geocode = os.environ["API_URL_BASE_REVERSE_GEOCODE"]
-mode = os.environ["MODE"]
-port = int(os.environ.get("PORT", "8443"))
-chat_dev_id = os.environ["DEV_ID"]
+API_KEY = os.getenv("MAP_SERVICE_API_KEY")
+API_URL_BASE_GEOCODE = os.getenv(
+    "API_URL_BASE_GEOCODE", "https://api.tomtom.com/search/2/geocode/"
+)
+API_URL_BASE_REVERSE_GEOCODE = os.getenv(
+    "API_URL_BASE_REVERSE_GEOCODE", "https://api.tomtom.com/search/2/reverseGeocode/"
+)
+CHAT_DEV_ID = os.getenv("DEV_ID")
+PORT = int(os.environ.get("PORT", "8443"))
+MODE = os.getenv("MODE", "polling")
+TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
+URL_PATH = os.getenv("URL_PATH", "")
+CERT = os.getenv("CERT")
+KEY = os.getenv("KEY")
+WEBHOOK_URL = os.getenv("WEBHOOK")

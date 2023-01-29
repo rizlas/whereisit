@@ -114,7 +114,7 @@ async def where(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     status_code, locations, location_count = helpers.get_locations(
-        user_input, cfg.api_url_base_geocode, cfg.api_key
+        user_input, cfg.API_URL_BASE_GEOCODE, cfg.API_KEY
     )
 
     if status_code == 200:
@@ -170,7 +170,7 @@ async def f_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info("User input %s", user_input)
 
         status_code, title, address = helpers.coordinate_search(
-            lat, lon, cfg.api_url_base_reverse_geocode, cfg.api_key
+            lat, lon, cfg.API_URL_BASE_REVERSE_GEOCODE, cfg.API_KEY
         )
 
         if status_code == 200:
@@ -209,7 +209,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     page_selected, user_input = query.data.split(":")
 
     status_code, locations, location_count = helpers.get_locations(
-        user_input, cfg.api_url_base_geocode, cfg.api_key
+        user_input, cfg.API_URL_BASE_GEOCODE, cfg.API_KEY
     )
 
     if status_code == 200:
@@ -257,7 +257,7 @@ async def inlinequery(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.info("is_coordinate_search True")
             lat, lon = query.split(",")
             status_code, title, address = helpers.coordinate_search(
-                lat, lon, cfg.api_url_base_reverse_geocode, cfg.api_key
+                lat, lon, cfg.API_URL_BASE_REVERSE_GEOCODE, cfg.API_KEY
             )
 
             logger.info("%s %s\n%s\n%s\n%s", lat, lon, status_code, title, address)
@@ -294,7 +294,7 @@ async def inlinequery(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await context.bot.answerInlineQuery(update.inline_query.id, results)
     elif query:
         status_code, locations, _ = helpers.get_locations(
-            query, cfg.api_url_base_geocode, cfg.api_key
+            query, cfg.API_URL_BASE_GEOCODE, cfg.API_KEY
         )
 
         if status_code == 200:
@@ -455,15 +455,14 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     logger.warning(log_text)
 
-    await context.bot.send_message(chat_id=cfg.chat_dev_id, text=log_text)
+    await context.bot.send_message(chat_id=cfg.CHAT_DEV_ID, text=log_text)
 
 
 def main():
     """
     Entry point
     """
-    mode = os.getenv("MODE")
-    application = ApplicationBuilder().token(cfg.token).build()
+    application = ApplicationBuilder().token(cfg.TG_TOKEN).build()
 
     # Telegram commands
     application.add_handler(CommandHandler("where", where))
@@ -487,13 +486,18 @@ def main():
     # log all errors
     application.add_error_handler(error)
 
-    if mode == "polling":
+    if cfg.MODE == "polling":
         application.run_polling()
-    # elif mode == "hook":
-    #     updater.start_webhook(listen="0.0.0.0", port=port, url_path=token)
-    #     updater.bot.set_webhook("https://whereisitbot.herokuapp.com/" + token)
-    else:
-        logger.error("You need to specify a working mode")
+    elif cfg.MODE == "hook":
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=cfg.PORT,
+            url_path=cfg.URL_PATH,
+            cert=cfg.CERT,
+            key=cfg.KEY,
+            webhook_url=cfg.WEBHOOK_URL,
+            secret_token=cfg.TG_TOKEN,
+        )
 
 
 if __name__ == "__main__":
