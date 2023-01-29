@@ -5,10 +5,10 @@ name = "pypi"
 
 [packages]
 requests = "*"
-python-telegram-bot = "==20.0"
 emoji = "*"
 base58 = "*"
 ansible = "==7.1.0"
+python-telegram-bot = {version = "==20.0", extras = ["webhooks"]}
 
 [dev-packages]
 black = "*"

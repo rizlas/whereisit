@@ -497,7 +497,7 @@ def main():
 
     if cfg.MODE == "polling":
         application.run_polling()
-    elif cfg.MODE == "hook":
+    elif cfg.MODE == "webhook":
         application.run_webhook(
             listen="0.0.0.0",
             port=cfg.PORT,
@@ -505,7 +505,7 @@ def main():
             cert=cfg.CERT,
             key=cfg.KEY,
             webhook_url=cfg.WEBHOOK_URL,
-            secret_token=cfg.TG_TOKEN,
+            secret_token=cfg.WEBHOOK_SECRET,
         )
 
 
