@@ -1,0 +1,8 @@
+---
+prj_source: "{{ ansible_env.HOME }}/whereisitbot"
+tg_port: 8443
+tg_mode: polling
+tg_url_path: example_path
+tg_cert: path_to_cert
+tg_cert_key: path_to_cert_key
+tg_webhook_url: a_nice_fqdn

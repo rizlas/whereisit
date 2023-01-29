@@ -1,0 +1,30 @@
+---
+- name: Deploy WhereIsIt Telegram bot
+  hosts: whereisithome
+  become: true
+  roles:
+    - geerlingguy.docker
+  tasks:
+    - name: Create project source folder
+      file:
+        path: "{{ prj_source }}"
+        state: directory
+    - name: Copy docker-compose
+      copy:
+        src: "docker-compose.yml"
+        dest: "{{ prj_source }}/docker-compose.yml"
+    - name: Templating env file
+      template:
+        src: "whereisit.env.j2"
+        dest: "{{ prj_source }}/whereisit.env"
+      notify: Docker compose restart
+    - name: Start WhereIsIt Telegram bot
+      docker_compose:
+        project_src: "{{ prj_source }}"
+        state: present
+  handlers:
+    - name: Docker compose restart
+      docker_compose:
+        project_src: "{{ prj_source }}"
+        build: false
+        restarted: true
